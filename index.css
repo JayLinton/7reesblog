@@ -11,6 +11,13 @@
   }
 }
 
+/* Ensure code blocks in Markdown articles scroll horizontally on mobile */
+.prose pre {
+  @apply max-w-full overflow-x-auto whitespace-pre;
+  /* Optional: make scrollbar subtle */
+  scrollbar-width: thin;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

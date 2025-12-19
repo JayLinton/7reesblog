@@ -50,7 +50,7 @@ const HomeView: React.FC<{ lang: Language }> = ({ lang }) => {
           >
             <div className="relative w-full max-w-xl">
               <DotMatrixImage 
-                src="https://img.cdn1.vip/i/69414d9a70376_1765887386.webp" 
+                src="https://s2.loli.net/2025/12/19/qnpzAvuljBrCfME.webp" 
                 className="w-full"
               />
               <span className="absolute -bottom-8 left-0 text-[10px] tracking-[0.2em] text-gray-500 dark:text-gray-400 font-light uppercase">
