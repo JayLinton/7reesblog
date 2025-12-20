@@ -4,24 +4,133 @@
 
 @layer base {
   body {
-    @apply bg-white dark:bg-[#0a0a0a] overflow-hidden font-sans;
+    @apply bg-white dark:bg-[#0a0a0a] overflow-x-hidden font-sans;
   }
   h1, h2, h3, .serif {
     font-family: 'Cormorant Garamond', serif;
   }
 }
 
-/* Ensure code blocks in Markdown articles scroll horizontally on mobile */
-.prose pre {
-  @apply max-w-full overflow-x-auto whitespace-pre;
-  /* Optional: make scrollbar subtle */
-  scrollbar-width: thin;
+/* ============================================================
+   ARTALK 极致简约质感定制 (V2.5 - 极致紧凑版)
+   ============================================================ */
+
+:root {
+  --at-color-main: #000 !important;
+  --at-color-font: #111111 !important; 
+  --at-color-bg: transparent !important;
+  --at-color-border: #f5f5f5 !important;
+  --at-color-grey: #a0a0a0 !important;
+  --at-color-ot-bg: #fafafa !important;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+.dark {
+  --at-color-main: #fff !important;
+  --at-color-font: #f0f0f0 !important; 
+  --at-color-border: #1a1a1a !important;
+  --at-color-grey: #666 !important;
+  --at-color-ot-bg: #141414 !important;
 }
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+
+/* 1. 编辑器容器 */
+.artalk .atk-main-editor {
+  @apply border border-gray-100 dark:border-neutral-900 rounded-md mb-8 bg-gray-50/40 dark:bg-neutral-900/10 p-5 transition-all duration-500 !important;
+  box-shadow: 0 4px 20px -10px rgba(0,0,0,0.05) !important;
 }
+
+.artalk .atk-main-editor:focus-within {
+  @apply border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900/30 !important;
+}
+
+.artalk .atk-header input {
+  @apply bg-transparent border-b border-gray-100 dark:border-neutral-800 rounded-none py-3 px-0 transition-all duration-500 focus:border-black dark:focus:border-white font-sans font-medium !important;
+  font-size: 14.5px !important; 
+  letter-spacing: 0.05em !important;
+}
+
+.artalk .atk-textarea {
+  @apply bg-transparent font-light text-[16px] !important;
+  border: none !important;
+  padding: 15px 0 !important;
+  line-height: 1.8 !important;
+}
+
+/* 2. 用户 ID 视觉梯度：中性灰 */
+.artalk .atk-nick, 
+.artalk .atk-nick a, 
+.artalk .atk-quote .atk-nick, 
+.artalk .atk-reply-to .atk-nick {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, sans-serif !important;
+  font-size: 14px !important; 
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  @apply text-neutral-500 dark:text-neutral-400 tracking-tight transition-colors !important;
+}
+
+/* 3. 评论内容：高对比度清晰 */
+.artalk .atk-content {
+  @apply font-normal text-[16.5px] leading-relaxed mt-2 !important;
+  color: var(--at-color-font) !important;
+  opacity: 1 !important;
+}
+
+/* 4. 间距优化：进一步缩小评论间上下间距 (1.25rem -> 0.75rem) */
+.artalk .atk-comment-wrap {
+  @apply border-none mb-0 border-b border-gray-50 dark:border-neutral-900/40 !important;
+  padding-top: 0.75rem !important;  /* 约 12px，极致紧凑 */
+  padding-bottom: 0.75rem !important;
+}
+
+/* 5. 互动按钮 */
+.artalk .atk-actions {
+  display: flex !important;
+  visibility: visible !important;
+  @apply mt-2 gap-6 items-center !important;
+  opacity: 0.6;
+}
+
+.artalk .atk-comment-wrap:hover .atk-actions {
+  opacity: 1;
+}
+
+.artalk .atk-actions .atk-action-reply,
+.artalk .atk-actions .atk-action-like,
+.artalk .atk-actions .atk-reply,
+.artalk .atk-actions .atk-like {
+  display: inline-flex !important;
+  align-items: center !important;
+  @apply gap-1.5 text-[10px] uppercase tracking-[0.15em] font-bold text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer !important;
+}
+
+/* 6. 发送按钮：文字垂直水平完美居中 */
+.artalk .atk-send-btn {
+  @apply bg-black dark:bg-white text-white dark:text-black rounded-sm px-10 py-3 text-[11px] tracking-[0.4em] uppercase font-bold transition-all duration-500 hover:opacity-75 !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  min-width: 120px; /* 确保有足够宽度承载居中文本 */
+}
+
+/* 7. 时间显示：最淡色 */
+.artalk .atk-meta {
+  @apply text-[9px] uppercase tracking-[0.2em] text-neutral-300 dark:text-neutral-700 mt-1 font-light !important;
+}
+
+/* 8. 隐藏冗余 */
+.artalk .atk-footer, 
+.artalk .atk-brand, 
+.artalk .atk-v-badge,
+.artalk .atk-badge-m {
+  display: none !important;
+}
+
+/* 9. 修正回复提示条 */
+.artalk .atk-reply-to {
+  @apply text-[12px] text-gray-400 dark:text-neutral-600 border-l-2 border-gray-100 dark:border-neutral-800 pl-3 py-1 mb-2 !important;
+}
+
+/* 工具类 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

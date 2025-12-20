@@ -17,11 +17,10 @@ export const friendLinksData: FriendLink[] = [
   },
     {
     id: '3',
-    name: 'Alice',
-    title: 'Artist',
-    avatar: 'https://picsum.photos/seed/alice/200',
-    url: 'https://example.com',
-    description: 'Artist'
+    name: '狐狸反走矣',
+    title: 'SouthFox',
+    avatar: 'https://blog.southfox.me/favicon.png',
+    url: 'https://blog.southfox.me/',
   },
 ];
 

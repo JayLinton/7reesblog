@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { Footer } from '../components/Footer';
@@ -64,7 +65,7 @@ const ArticleDetailView: React.FC<{ lang: Language }> = ({ lang }) => {
       </div>
 
       <article className="w-full max-w-full prose prose-neutral dark:prose-invert prose-sm md:prose-base mx-auto font-light text-gray-700 dark:text-gray-300 leading-loose prose-headings:font-serif prose-headings:font-light prose-headings:text-neutral-900 dark:prose-headings:text-neutral-100 prose-a:text-black dark:prose-a:text-white prose-blockquote:border-l-gray-200 dark:prose-blockquote:border-l-neutral-700 prose-blockquote:text-gray-500 dark:prose-blockquote:text-gray-400 prose-blockquote:italic prose-img:rounded-sm overflow-x-hidden">
-        <ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {lang === 'zh' ? article.contentCN : article.contentEN}
         </ReactMarkdown>
       </article>

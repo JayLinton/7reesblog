@@ -20,6 +20,13 @@ pinned: true
 
 ---
 
+**[0.3.0-Beta] - 2025-12-20**
+
+**新增**
+- 新增了留言板功能，使用的是Artalk的自托管方案。
+
+---
+
 **[0.2.1-Beta] - 2025-12-19**
 
 **修复**
@@ -70,6 +77,23 @@ pinned: true
 - New: Official launch of 7rees.cc.
 
 ------
+
+**[0.3.0-Beta] - 2025-12-20**
+
+**ADDED**
+
+- New: A comment board feature, powered by the self-hosted Artalk solution..
+
+---
+
+**[0.2.1-Beta] - 2025-12-19**
+
+**FIXED**
+
+- Fixed the issue where long code blocks caused horizontal jitter or blank margins in article content and the overall page layout.
+- Just found out today that cross-region ICP filing is not possible without a residence permit or temporary stay permit. ~~Fine, this thread is closed~~ — ditching the newly purchased Alibaba Cloud ECS and switching to AWS EC2 immediately.
+
+---
 
 **[0.2.0-Beta] - 2025-12-18**
 
