@@ -37,12 +37,7 @@ export const usefulLinksData: UsefulLink[] = [
   },
   {
     id: '3',
-    name: 'Framer Motion',
-    url: 'https://www.framer.com/motion/'
+    name: 'CodeSandbox',
+    url: 'https://codesandbox.io/'
   },
-  {
-    id: '4',
-    name: 'Dribbble',
-    url: 'https://dribbble.com'
-  }
 ];

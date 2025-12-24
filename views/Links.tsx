@@ -184,7 +184,7 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
 
       {tab === 'friends' && (
         <div className="mt-28 pt-12 border-t border-gray-100 dark:border-neutral-900 text-center">
-          <p className="text-[10px] text-gray-400 dark:text-neutral-600 font-light tracking-[0.4em] mb-6 uppercase">
+          <p className="text-[12px] text-gray-400 dark:text-neutral-600 font-light tracking-[0.4em] mb-6 uppercase">
             {lang === 'zh' ? '交换链接' : 'EXCHANGE LINKS'}
           </p>
           <div className="text-[10px] text-gray-400 dark:text-neutral-500 tracking-[0.15em] leading-loose uppercase">
@@ -192,6 +192,10 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
               7REES / 自由如飞鸟 / HTTP://WWW.7REES.CC / <a href="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAENIntpQ-d_KUk_d1zunZPb9kqOmPtXHgACWDcAAjgIIFbVnCofqV4kczYE.jpg" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white underline underline-offset-4 decoration-neutral-200 dark:decoration-neutral-800 transition-colors">[AVATAR]</a>
             </p>
             <p className="opacity-50">Format: Name / Title / URL / Avatar</p>
+            <p>Send to: <a href="mailto:1063750098@qq.com" className="hover:text-black dark:hover:text-white underline decoration-gray-300 dark:decoration-neutral-700 underline-offset-4">1063750098@qq.com</a></p>
+            <p className="opacity-50">
+              {lang === 'zh' ? '或直接在留言板页面留言' : 'Or leave a comment on the Guestbook'}
+            </p>
           </div>
         </div>
       )}

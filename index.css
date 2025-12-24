@@ -12,7 +12,76 @@
 }
 
 /* ============================================================
-   ARTALK 极致简约质感定制 (V2.5 - 极致紧凑版)
+   MARKDOWN 排版修正
+   ============================================================ */
+
+.prose img {
+  display: inline-block !important;
+  margin-top: 0.2rem !important;
+  margin-bottom: 0.2rem !important;
+  margin-left: 0.125rem !important;
+  margin-right: 0.125rem !important;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+/* ============================================================
+   极简图书展示架 (Book Shelf) - UI 升级版
+   ============================================================ */
+
+.book-shelf {
+  @apply flex gap-6 md:gap-10 mb-16 overflow-x-auto no-scrollbar pb-4 -mx-2 px-2 snap-x snap-mandatory !important;
+}
+
+.book-card {
+  @apply flex-none w-[120px] md:w-[150px] snap-start !important;
+}
+
+.book-cover-wrapper {
+  @apply relative aspect-[3/4.2] mb-4 overflow-hidden rounded-sm bg-gray-50 dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-1.5 !important;
+}
+
+.book-cover-img {
+  /* 确保完全彩色，不使用 grayscale */
+  @apply w-full h-full object-cover opacity-100 filter-none transition-all duration-700 !important;
+  filter: none !important; 
+}
+
+.book-title {
+  /* 针对低分辨率优化：增加字重，稍微加大字号，改用更稳重的排版 */
+  @apply font-serif font-semibold text-[15px] md:text-[16px] text-neutral-900 dark:text-neutral-100 leading-tight mb-1.5 truncate tracking-tight !important;
+}
+
+.book-meta {
+  /* 作者字号进一步调大，并增加对比度 */
+  @apply text-[12px] md:text-[13px] tracking-normal text-gray-500 dark:text-neutral-400 font-normal leading-snug mb-3 !important;
+}
+
+.book-progress-info {
+  @apply flex items-center justify-between mb-1.5 px-0.5 !important;
+}
+
+.book-progress-label {
+  @apply text-[9px] uppercase tracking-[0.2em] text-gray-400 dark:text-neutral-600 font-bold !important;
+}
+
+.book-progress-percent {
+  /* 阅读进度百分比样式 */
+  @apply text-[10px] font-mono font-medium text-neutral-600 dark:text-neutral-400 !important;
+}
+
+.book-progress-bar {
+  @apply w-full h-[1.5px] bg-gray-100 dark:bg-neutral-900 relative rounded-full overflow-hidden !important;
+}
+
+.book-progress-inner {
+  @apply absolute left-0 top-0 h-full bg-black dark:bg-white transition-all duration-1000 ease-out !important;
+}
+
+
+
+/* ============================================================
+   ARTALK 极致简约质感定制 (V2.6)
    ============================================================ */
 
 :root {
@@ -32,7 +101,6 @@
   --at-color-ot-bg: #141414 !important;
 }
 
-/* 1. 编辑器容器 */
 .artalk .atk-main-editor {
   @apply border border-gray-100 dark:border-neutral-900 rounded-md mb-8 bg-gray-50/40 dark:bg-neutral-900/10 p-5 transition-all duration-500 !important;
   box-shadow: 0 4px 20px -10px rgba(0,0,0,0.05) !important;
@@ -55,7 +123,6 @@
   line-height: 1.8 !important;
 }
 
-/* 2. 用户 ID 视觉梯度：中性灰 */
 .artalk .atk-nick, 
 .artalk .atk-nick a, 
 .artalk .atk-quote .atk-nick, 
@@ -67,21 +134,18 @@
   @apply text-neutral-500 dark:text-neutral-400 tracking-tight transition-colors !important;
 }
 
-/* 3. 评论内容：高对比度清晰 */
 .artalk .atk-content {
   @apply font-normal text-[16.5px] leading-relaxed mt-2 !important;
   color: var(--at-color-font) !important;
   opacity: 1 !important;
 }
 
-/* 4. 间距优化：进一步缩小评论间上下间距 (1.25rem -> 0.75rem) */
 .artalk .atk-comment-wrap {
   @apply border-none mb-0 border-b border-gray-50 dark:border-neutral-900/40 !important;
-  padding-top: 0.75rem !important;  /* 约 12px，极致紧凑 */
+  padding-top: 0.75rem !important; 
   padding-bottom: 0.75rem !important;
 }
 
-/* 5. 互动按钮 */
 .artalk .atk-actions {
   display: flex !important;
   visibility: visible !important;
@@ -102,7 +166,6 @@
   @apply gap-1.5 text-[10px] uppercase tracking-[0.15em] font-bold text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer !important;
 }
 
-/* 6. 发送按钮：文字垂直水平完美居中 */
 .artalk .atk-send-btn {
   @apply bg-black dark:bg-white text-white dark:text-black rounded-sm px-10 py-3 text-[11px] tracking-[0.4em] uppercase font-bold transition-all duration-500 hover:opacity-75 !important;
   border: none !important;
@@ -110,15 +173,13 @@
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  min-width: 120px; /* 确保有足够宽度承载居中文本 */
+  min-width: 120px;
 }
 
-/* 7. 时间显示：最淡色 */
 .artalk .atk-meta {
   @apply text-[9px] uppercase tracking-[0.2em] text-neutral-300 dark:text-neutral-700 mt-1 font-light !important;
 }
 
-/* 8. 隐藏冗余 */
 .artalk .atk-footer, 
 .artalk .atk-brand, 
 .artalk .atk-v-badge,
@@ -126,11 +187,5 @@
   display: none !important;
 }
 
-/* 9. 修正回复提示条 */
-.artalk .atk-reply-to {
-  @apply text-[12px] text-gray-400 dark:text-neutral-600 border-l-2 border-gray-100 dark:border-neutral-800 pl-3 py-1 mb-2 !important;
-}
-
-/* 工具类 */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

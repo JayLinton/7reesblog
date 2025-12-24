@@ -8,7 +8,7 @@ hidden: false
 pinned: true
 ---
 
-👋 **I'm 7rees**
+👋 **我是7rees**
 
 Developer / Deep Thinker / Explorer
 
@@ -17,7 +17,7 @@ Developer / Deep Thinker / Explorer
 
 ---
 
-🌌 **Manifesto**
+🌌 **思考**
 
 * **自由观**：追求全维度的自由——不仅是开源与技术选型的自主，更是独立人格与自由灵魂的存续。
 * **思维偏好**：拒绝浅薄与碎片化。倾向于底层逻辑的重构与哲学维度的思考。
@@ -25,9 +25,9 @@ Developer / Deep Thinker / Explorer
 
 ---
 
-🚀 **Tech Stack**
+🚀 **找到更多的我**
 
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)  ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/JayLinton)[![Steam](https://img.shields.io/badge/Steam-1B2838?style=flat-square&logo=steam&logoColor=white)](https://steamcommunity.com/profiles/76561198319154640/)[![Mail](https://img.shields.io/badge/Mail-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:1063750098@qq.com)[![小红书](https://img.shields.io/badge/小红书-FE2C55?style=flat-square&logo=xiaohongshu&logoColor=white)](https://xhslink.com/m/4hWR5OSbH9p)[![TikTok](https://img.shields.io/badge/TikTok-000000?style=flat-square&logo=tiktok&logoColor=white)](https://v.douyin.com/R_gH8tdzc8I/)[![Bilibili](https://img.shields.io/badge/Bilibili-00A1D6?style=flat-square&logo=bilibili&logoColor=white)](https://space.bilibili.com/9522380?spm_id_from=333.1007.0.0)[![豆瓣](https://img.shields.io/badge/豆瓣-00B42A?style=flat-square&logo=douban&logoColor=white)](https://www.douban.com/people/162249355/?_i=6315269rRQEy6i)
 
 ---
 [EN_START]
@@ -48,6 +48,6 @@ Developer / Deep Thinker / Explorer
 * **State of Being**：Driven by broad interests, I refuse to be defined by a single tech stack or professional label. Like a migratory bird, I find a transient rest in the here and now.
 ---
 
-🚀 **Tech Stack**
+🚀 **Find more about me**
 
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)  ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/JayLinton)[![Steam](https://img.shields.io/badge/Steam-1B2838?style=flat-square&logo=steam&logoColor=white)](https://steamcommunity.com/profiles/76561198319154640/)[![Mail](https://img.shields.io/badge/Mail-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:1063750098@qq.com)[![rednote](https://img.shields.io/badge/rednote-FE2C55?style=flat-square&logo=xiaohongshu&logoColor=white)](https://xhslink.com/m/4hWR5OSbH9p)[![TikTok](https://img.shields.io/badge/TikTok-000000?style=flat-square&logo=tiktok&logoColor=white)](https://v.douyin.com/R_gH8tdzc8I/)[![Bilibili](https://img.shields.io/badge/Bilibili-00A1D6?style=flat-square&logo=bilibili&logoColor=white)](https://space.bilibili.com/9522380?spm_id_from=333.1007.0.0)[![豆瓣](https://img.shields.io/badge/Douban-00B42A?style=flat-square&logo=douban&logoColor=white)](https://www.douban.com/people/162249355/?_i=6315269rRQEy6i)
