@@ -9,8 +9,8 @@ import { Globe, Moon, Sun, ArrowUp } from 'lucide-react';
 const HomeView = lazy(() => import('./views/Home'));
 const ArticlesView = lazy(() => import('./views/Articles'));
 const ArticleDetailView = lazy(() => import('./views/ArticleDetail'));
-const ProjectsView = lazy(() => import('./views/Projects'));
 const LinksView = lazy(() => import('./views/Links'));
+const AboutView = lazy(() => import('./views/About'));
 
 // Loading Fallback
 const LoadingFallback = () => (
@@ -141,8 +141,8 @@ const App: React.FC = () => {
             <Route path="/" element={<HomeView lang={lang} />} />
             <Route path="/articles" element={<ArticlesView lang={lang} />} />
             <Route path="/articles/:id" element={<ArticleDetailView lang={lang} />} />
-            <Route path="/projects" element={<ProjectsView lang={lang} />} />
             <Route path="/links" element={<LinksView lang={lang} />} />
+            <Route path="/about" element={<AboutView lang={lang} />} />
             {/* Fallback route */}
             <Route path="*" element={<HomeView lang={lang} />} />
           </Routes>

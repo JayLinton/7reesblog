@@ -1,7 +1,7 @@
 ---
 id: interest-3
-titleCN: 我眼中的杭州与南京
-titleEN: My Perspective: From Hangzhou to Nanjing
+titleCN: 这里的湖水温柔得多
+titleEN: The lake here is so much tenderer.
 date: 2025.12.24
 category: interest
 hidden: false

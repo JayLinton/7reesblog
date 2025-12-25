@@ -1,7 +1,7 @@
 ---
 id: interest-1
-titleCN: 《局外人》：他死于太过诚实的阳光
-titleEN: The Stranger: He Died in the Blindingly Honest Sun
+titleCN: 他死于太过诚实的阳光
+titleEN: He Died in the Blindingly Honest Sun
 date: 2025.12.16
 category: interest
 ---
@@ -44,7 +44,6 @@ category: interest
 
 **在这个冷漠的世界里，你并不欠任何人一个解释**。
 
----
 [EN_START]
 
 The incessant rain in Nanjing these past few days brings a chill that seems to seep into one’s very bones. Walking down Zhongshan Road, the view is filled with the desolation of withered plane trees. Lead-grey clouds hang low in the air—a gloom that inevitably reminds me of that piercing, viscous sunshine in Algiers that eventually brewed a murder.

@@ -26,15 +26,18 @@
 }
 
 /* ============================================================
-   极简图书展示架 (Book Shelf) - UI 升级版
+   极简图书展示架 (Book Shelf)
    ============================================================ */
 
 .book-shelf {
-  @apply flex gap-6 md:gap-10 mb-16 overflow-x-auto no-scrollbar pb-4 -mx-2 px-2 snap-x snap-mandatory !important;
+  /* 使用 -mx-6 和 px-6 确保滚动区域占满屏幕宽度，同时卡片与页面文字对齐 */
+  @apply flex gap-6 md:gap-10 mb-16 overflow-x-auto no-scrollbar pb-6 -mx-6 px-6 snap-x snap-mandatory !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .book-card {
-  @apply flex-none w-[120px] md:w-[150px] snap-start !important;
+  /* 调整移动端宽度，确保在窄屏下也能完整看到第一张并露出第二张边缘 */
+  @apply flex-none w-[140px] md:w-[160px] snap-start !important;
 }
 
 .book-cover-wrapper {
@@ -42,18 +45,16 @@
 }
 
 .book-cover-img {
-  /* 确保完全彩色，不使用 grayscale */
   @apply w-full h-full object-cover opacity-100 filter-none transition-all duration-700 !important;
   filter: none !important; 
+  margin: 0 !important; /* 覆盖 prose img 的 margin */
 }
 
 .book-title {
-  /* 针对低分辨率优化：增加字重，稍微加大字号，改用更稳重的排版 */
   @apply font-serif font-semibold text-[15px] md:text-[16px] text-neutral-900 dark:text-neutral-100 leading-tight mb-1.5 truncate tracking-tight !important;
 }
 
 .book-meta {
-  /* 作者字号进一步调大，并增加对比度 */
   @apply text-[12px] md:text-[13px] tracking-normal text-gray-500 dark:text-neutral-400 font-normal leading-snug mb-3 !important;
 }
 
@@ -66,7 +67,6 @@
 }
 
 .book-progress-percent {
-  /* 阅读进度百分比样式 */
   @apply text-[10px] font-mono font-medium text-neutral-600 dark:text-neutral-400 !important;
 }
 
@@ -78,10 +78,8 @@
   @apply absolute left-0 top-0 h-full bg-black dark:bg-white transition-all duration-1000 ease-out !important;
 }
 
-
-
 /* ============================================================
-   ARTALK 极致简约质感定制 (V2.6)
+   ARTALK 极致简约质感定制
    ============================================================ */
 
 :root {
@@ -106,85 +104,19 @@
   box-shadow: 0 4px 20px -10px rgba(0,0,0,0.05) !important;
 }
 
-.artalk .atk-main-editor:focus-within {
-  @apply border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900/30 !important;
-}
-
 .artalk .atk-header input {
   @apply bg-transparent border-b border-gray-100 dark:border-neutral-800 rounded-none py-3 px-0 transition-all duration-500 focus:border-black dark:focus:border-white font-sans font-medium !important;
   font-size: 14.5px !important; 
-  letter-spacing: 0.05em !important;
 }
 
 .artalk .atk-textarea {
   @apply bg-transparent font-light text-[16px] !important;
   border: none !important;
-  padding: 15px 0 !important;
-  line-height: 1.8 !important;
-}
-
-.artalk .atk-nick, 
-.artalk .atk-nick a, 
-.artalk .atk-quote .atk-nick, 
-.artalk .atk-reply-to .atk-nick {
-  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, sans-serif !important;
-  font-size: 14px !important; 
-  font-weight: 700 !important;
-  text-decoration: none !important;
-  @apply text-neutral-500 dark:text-neutral-400 tracking-tight transition-colors !important;
-}
-
-.artalk .atk-content {
-  @apply font-normal text-[16.5px] leading-relaxed mt-2 !important;
-  color: var(--at-color-font) !important;
-  opacity: 1 !important;
-}
-
-.artalk .atk-comment-wrap {
-  @apply border-none mb-0 border-b border-gray-50 dark:border-neutral-900/40 !important;
-  padding-top: 0.75rem !important; 
-  padding-bottom: 0.75rem !important;
-}
-
-.artalk .atk-actions {
-  display: flex !important;
-  visibility: visible !important;
-  @apply mt-2 gap-6 items-center !important;
-  opacity: 0.6;
-}
-
-.artalk .atk-comment-wrap:hover .atk-actions {
-  opacity: 1;
-}
-
-.artalk .atk-actions .atk-action-reply,
-.artalk .atk-actions .atk-action-like,
-.artalk .atk-actions .atk-reply,
-.artalk .atk-actions .atk-like {
-  display: inline-flex !important;
-  align-items: center !important;
-  @apply gap-1.5 text-[10px] uppercase tracking-[0.15em] font-bold text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer !important;
 }
 
 .artalk .atk-send-btn {
   @apply bg-black dark:bg-white text-white dark:text-black rounded-sm px-10 py-3 text-[11px] tracking-[0.4em] uppercase font-bold transition-all duration-500 hover:opacity-75 !important;
   border: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  min-width: 120px;
-}
-
-.artalk .atk-meta {
-  @apply text-[9px] uppercase tracking-[0.2em] text-neutral-300 dark:text-neutral-700 mt-1 font-light !important;
-}
-
-.artalk .atk-footer, 
-.artalk .atk-brand, 
-.artalk .atk-v-badge,
-.artalk .atk-badge-m {
-  display: none !important;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
