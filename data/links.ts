@@ -16,11 +16,18 @@ export const friendLinksData: FriendLink[] = [
     url: 'https://blog.southfox.me/',
   },
   {
-    id: '2',
+    id: '3',
     name: '你留下点希望的影像吧',
     title: '回到现场时我们只发现了这个',
     avatar: 'https://s2.loli.net/2025/12/25/XEfUD7vrNmbKBP1.webp',
     url: 'https://www.asecarc.top/',
+  },
+  {
+    id: '4',
+    name: '鹅玉',
+    title: '可以原谅猫咪的一切，不是吗',
+    avatar: 'https://ro3or.com/favicon.png',
+    url: 'https://ro3or.com/',
   },
 ];
 

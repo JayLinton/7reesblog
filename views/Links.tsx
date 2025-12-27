@@ -189,7 +189,7 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
           </p>
           <div className="text-[10px] text-gray-400 dark:text-neutral-500 tracking-[0.15em] leading-loose uppercase">
             <p className="text-neutral-600 dark:text-neutral-400 mb-3 select-all">
-              7REES / 自由流动的树 / HTTPS://WWW.7REES.CC / <a href="https://s2.loli.net/2025/12/25/qf3ZGRr6iuCgO2e.jpg" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white underline underline-offset-4 decoration-neutral-200 dark:decoration-neutral-800 transition-colors">[AVATAR]</a>
+              7rees / 自由流动的树 / HTTPS://WWW.7REES.CC / <a href="https://s2.loli.net/2025/12/25/qf3ZGRr6iuCgO2e.jpg" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white underline underline-offset-4 decoration-neutral-200 dark:decoration-neutral-800 transition-colors">[AVATAR]</a>
             </p>
             <p className="opacity-50">Format: Name / Title / URL / Avatar</p>
             <p>Send to: <a href="mailto:1063750098@qq.com" className="hover:text-black dark:hover:text-white underline decoration-gray-300 dark:decoration-neutral-700 underline-offset-4">1063750098@qq.com</a></p>

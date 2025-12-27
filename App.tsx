@@ -3,7 +3,8 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Language } from './types';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Globe, Moon, Sun, ArrowUp } from 'lucide-react';
+import { Globe, Moon, Sun, ArrowUp, Sparkles, X } from 'lucide-react';
+import { Fireworks } from './components/Fireworks';
 
 // Lazy load view components
 const HomeView = lazy(() => import('./views/Home'));
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   });
   
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isFireworksActive, setIsFireworksActive] = useState(false);
   const location = useLocation();
 
   // Persist language changes
@@ -74,6 +76,17 @@ const App: React.FC = () => {
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Keyboard support for closing fireworks
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFireworksActive) {
+        setIsFireworksActive(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFireworksActive]);
 
   const toggleLanguage = () => {
     setLang(prev => prev === 'zh' ? 'en' : 'zh');
@@ -116,7 +129,16 @@ const App: React.FC = () => {
           )}
         </AnimatePresence>
 
-        <div className="flex flex-col items-end gap-4">
+        <div className="flex flex-col items-end gap-5">
+          <button 
+            onClick={() => setIsFireworksActive(!isFireworksActive)}
+            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${isFireworksActive ? 'text-black dark:text-white scale-110' : 'text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white'}`}
+            title="Toggle Fireworks"
+          >
+            <Sparkles className={`w-10 h-10 ${isFireworksActive ? 'animate-pulse' : ''}`} />
+            <span className="text-[11px] font-mono tracking-widest opacity-80">2026</span>
+          </button>
+
           <button 
             onClick={toggleTheme}
             className="flex justify-end items-center gap-2 text-[10px] tracking-widest font-light text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors"
@@ -135,6 +157,74 @@ const App: React.FC = () => {
         </div>
       </div>
 
+      {/* Fireworks Overlay */}
+      <AnimatePresence>
+        {isFireworksActive && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[55] bg-black/35 backdrop-blur-sm pointer-events-none"
+            />
+            
+            <Fireworks />
+
+            {/* Fireworks Close Button */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed top-8 right-8 z-[70] p-3 text-white/50 hover:text-white transition-colors"
+              onClick={() => setIsFireworksActive(false)}
+            >
+              <X className="w-6 h-6 stroke-1" />
+            </motion.button>
+
+            {/* New Year Text with "Writing" Animation */}
+            <div className="fixed inset-0 z-[65] flex items-center justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                /* FIX: Moved exit transition from the transition prop to the exit prop's transition field to resolve TS error */
+                exit={{ 
+                  opacity: 0, 
+                  scale: 0.95,
+                  transition: { duration: 0.3 }
+                }}
+                transition={{ 
+                  duration: 1.2, 
+                  ease: "circOut"
+                }}
+                className="text-center"
+              >
+                <motion.h2 
+                  className="serif italic text-4xl md:text-6xl lg:text-7xl text-white font-light tracking-wide shadow-black drop-shadow-lg"
+                >
+                  {["Happy", "New", "Year", "2026"].map((word, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 0, filter: "blur(10px)" }}
+                      animate={{ opacity: 1, filter: "blur(0px)" }}
+                      transition={{ delay: 0.3 + i * 0.15, duration: 1 }}
+                      className="inline-block mx-2"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </motion.h2>
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "60px", opacity: 0.5 }}
+                  transition={{ delay: 1.2, duration: 1 }}
+                  className="h-[1px] bg-white mx-auto mt-6"
+                />
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
           <Routes location={location} key={location.pathname}>
@@ -143,7 +233,6 @@ const App: React.FC = () => {
             <Route path="/articles/:id" element={<ArticleDetailView lang={lang} />} />
             <Route path="/links" element={<LinksView lang={lang} />} />
             <Route path="/about" element={<AboutView lang={lang} />} />
-            {/* Fallback route */}
             <Route path="*" element={<HomeView lang={lang} />} />
           </Routes>
         </Suspense>

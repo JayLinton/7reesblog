@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>7rees | 自由流动的树</title>
+  <link>https://www.7rees.cc</link>
+  <description>7rees | 自由流动的树</description>
+  <language>zh-cn</language>
+  <lastBuildDate>Sat, 27 Dec 2025 07:08:45 GMT</lastBuildDate>
+  <atom:link href="https://www.7rees.cc/rss.xml" rel="self" type="application/rss+xml" />
+  
+    <item>
+      <title><![CDATA[基于大语言模型（LLM）的遗留系统重构与自动化测试流水线实践]]></title>
+      <link>https://www.7rees.cc/articles/tech-2</link>
+      <guid isPermaLink="false">tech-2</guid>
+      <pubDate>Thu, 25 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[tech]]></category>
+      <description><![CDATA[基于大语言模型（LLM）的遗留系统重构与自动化测试流水线实践]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>软件生命周期中，技术债务的累积导致遗留代码（Legacy Code）的可维护性呈指数级下降。传统的人工重构过程风险高、耗时长，且容易引入回归错误（Regression Bugs）。本文档详细阐述了一套标准化的工程化工作流，利用大语言模型（LLM）的代码理解与生成能力，实现从“语义解析”到“特征测试固化”，再到“结构重构”的自动化闭环。实验数据表明，该流程能有效将圈复杂度（Cyclomatic Complexity）降低 50% 以上，同时保持 100% 的业务逻辑一致性。</p>
+<h3><strong>1. 背景与术语定义</strong></h3>
+<h4><strong>1.1 问题域</strong></h4>
+<p>遗留代码通常指缺乏自动化测试保护、依赖隐式上下文、且逻辑高度耦合的代码片段。其核心特征包括：</p>
+<ul>
+<li><strong>高认知负荷</strong>：变量命名缺乏语义（如 <code>a</code>, <code>b</code>, <code>data</code>）。</li>
+<li><strong>控制流混乱</strong>：深层嵌套的条件判断（Nested Conditionals）。</li>
+<li><strong>类型缺失</strong>：动态语言中缺乏显式的类型约束。</li>
+</ul>
+<h4><strong>1.2 目标设定</strong></h4>
+<p>本方案旨在通过 LLM 辅助，达成以下工程目标：</p>
+<ol>
+<li><strong>行为固化</strong>：在不理解业务全貌的情况下，生成覆盖所有路径的测试用例。</li>
+<li><strong>代码清洗</strong>：消除魔术数字，实施卫语句（Guard Clauses），添加类型注解。</li>
+<li><strong>零副作用</strong>：确保输入输出关系在重构前后严格一致。</li>
+</ol>
+<h3><strong>2. 实验环境配置</strong></h3>
+<ul>
+<li><strong>Python Version</strong>: 3.10+ (支持 Type Hints)</li>
+<li><strong>Test Framework</strong>: Pytest 7.0+</li>
+<li><strong>Static Analysis</strong>: Mypy, Pylint, Radon (用于计算复杂度)</li>
+<li><strong>LLM Model</strong>: GPT-4 / Claude-3.5-Sonnet / DeepSeek-Coder-V2 (Temperature set to 0.0 for deterministic output)</li>
+</ul>
+<h3><strong>3. 目标对象分析</strong></h3>
+<p>选取典型的“面条代码”作为实验对象。该函数负责根据用户类型计算最终费用，逻辑分支隐晦。</p>
+<p><strong>原始代码 (</strong><code>**legacy_core.py**</code><strong>):</strong></p>
+<p>python</p>
+<pre><code class="language-plain">def calc_fee(u, amt, loc):
+    # u: 0=guest, 1=member, 2=vip
+    # loc: 0=local, 1=foreign
+    if u == 0:
+        return amt
+    elif u == 1:
+        if loc == 1:
+            return amt * 1.05
+        else:
+            return amt
+    elif u == 2:
+        if amt &gt; 500:
+            if loc == 1:
+                return amt * 0.95
+            else:
+                return amt * 0.9
+        else:
+            return amt * 0.98
+    return amt
+</code></pre>
+<p><strong>初始指标 (Metrics):</strong></p>
+<ul>
+<li><strong>Lines of Code (LOC)</strong>: 15</li>
+<li><strong>Cyclomatic Complexity (CC)</strong>: 6 (高)</li>
+<li><strong>Maintainability Index</strong>: 45 (低)</li>
+</ul>
+<h3><strong>4. 执行流程 (Workflow Execution)</strong></h3>
+<h4><strong>4.1 阶段一：逻辑逆向工程 (Logic Reverse Engineering)</strong></h4>
+<p>LLM 首先被用作解析器，将代码逻辑转化为自然语言或伪代码。此步骤用于生成“业务规则真值表”。</p>
+<p><strong>Prompt 指令:</strong></p>
+<p>text</p>
+<pre><code class="language-plain">Role: Static Code Analyzer
+Task: Analyze the provided python function `calc_fee`.
+Output:
+1. A Decision Table mapping Inputs (u, amt, loc) to Output Logic.
+2. List of all constant values and their implied meaning.
+</code></pre>
+<p><strong>LLM 输出结果 (结构化数据):</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">User Type (u)</th>
+<th align="left">Amount (amt)</th>
+<th align="left">Location (loc)</th>
+<th align="left">Operation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">0 (Guest)</td>
+<td align="left">Any</td>
+<td align="left">Any</td>
+<td align="left">return amt</td>
+</tr>
+<tr>
+<td align="left">1 (Member)</td>
+<td align="left">Any</td>
+<td align="left">1 (Foreign)</td>
+<td align="left">amt * 1.05</td>
+</tr>
+<tr>
+<td align="left">1 (Member)</td>
+<td align="left">Any</td>
+<td align="left">0 (Local)</td>
+<td align="left">amt</td>
+</tr>
+<tr>
+<td align="left">2 (VIP)</td>
+<td align="left">&gt; 500</td>
+<td align="left">1 (Foreign)</td>
+<td align="left">amt * 0.95</td>
+</tr>
+<tr>
+<td align="left">2 (VIP)</td>
+<td align="left">&gt; 500</td>
+<td align="left">0 (Local)</td>
+<td align="left">amt * 0.90</td>
+</tr>
+<tr>
+<td align="left">2 (VIP)</td>
+<td align="left">&lt;= 500</td>
+<td align="left">Any</td>
+<td align="left">amt * 0.98</td>
+</tr>
+</tbody></table>
+<h4><strong>4.2 阶段二：特征测试集生成 (Characterization Test Generation)</strong></h4>
+<p>基于上述真值表，生成“快照测试（Snapshot Testing）”。此阶段的关键是覆盖率，而非测试代码的优雅度。</p>
+<p><strong>技术要点:</strong></p>
+<ul>
+<li>使用 <code>math.isclose</code> 处理浮点数精度问题。</li>
+<li>使用 <code>@pytest.mark.parametrize</code> 实现数据驱动测试。</li>
+</ul>
+<p><strong>生成的测试套件 (</strong><code>**tests/test_legacy_core.py**</code><strong>):</strong></p>
+<p>python</p>
+<pre><code class="language-plain">import pytest
+import math
+from legacy_core import calc_fee
+
+# 定义容差
+TOLERANCE = 1e-9
+
+test_data = [
+    # (u, amt, loc, expected)
+    # Guest Case
+    (0, 100, 0, 100),
+    (0, 100, 1, 100),
+    
+    # Member Case
+    (1, 100, 0, 100),       # Local
+    (1, 100, 1, 105.0),     # Foreign (1.05 fee)
+    
+    # VIP Case (Low Amount)
+    (2, 100, 0, 98.0),      # Local, &lt;=500
+    (2, 500, 1, 490.0),     # Boundary Value
+    
+    # VIP Case (High Amount)
+    (2, 1000, 0, 900.0),    # Local, &gt;500 (0.9 discount)
+    (2, 1000, 1, 950.0),    # Foreign, &gt;500 (0.95 discount)
+    
+    # Invalid/Fallback Case
+    (3, 100, 0, 100),
+]
+
+@pytest.mark.parametrize(&quot;u, amt, loc, expected&quot;, test_data)
+def test_calc_fee_behavior(u, amt, loc, expected):
+    result = calc_fee(u, amt, loc)
+    assert math.isclose(result, expected, rel_tol=TOLERANCE), \
+        f&quot;Failed for input: u={u}, amt={amt}, loc={loc}. Got {result}, expected {expected}&quot;
+</code></pre>
+<p><strong>验证:</strong>
+执行 <code>pytest</code>。结果：<strong>PASSED (9/9)</strong>。基准已建立。</p>
+<h4><strong>4.3 阶段三：结构化重构 (Structural Refactoring)</strong></h4>
+<p>利用 Chain-of-Thought (CoT) 提示工程，指导 LLM 进行多维度的代码优化。</p>
+<p><strong>Prompt 指令:</strong></p>
+<p>text</p>
+<pre><code class="language-plain">Task: Refactor the python function `calc_fee`.
+Constraints:
+1. Use `IntEnum` for UserType and Location.
+2. Replace nested if-else with Guard Clauses (Early Return).
+3. Add Python Type Hints.
+4. Extract magic numbers into named constants.
+5. DO NOT change logical behavior.
+</code></pre>
+<p><strong>重构后的代码 (</strong><code>**legacy_core_v2.py**</code><strong>):</strong></p>
+<p>python</p>
+<pre><code class="language-plain">from enum import IntEnum
+from typing import Final
+
+class UserType(IntEnum):
+    GUEST = 0
+    MEMBER = 1
+    VIP = 2
+
+class Location(IntEnum):
+    LOCAL = 0
+    FOREIGN = 1
+
+# Business Rules / Constants
+MEMBER_FOREIGN_FEE_RATE: Final[float] = 1.05
+VIP_THRESHOLD: Final[int] = 500
+VIP_LOW_AMT_RATE: Final[float] = 0.98
+VIP_HIGH_AMT_FOREIGN_RATE: Final[float] = 0.95
+VIP_HIGH_AMT_LOCAL_RATE: Final[float] = 0.90
+
+def calculate_fee(user_type: int, amount: float, location: int) -&gt; float:
+    &quot;&quot;&quot;
+    Calculates the final fee based on user tier and location.
+    Refactored version of legacy calc_fee.
+    &quot;&quot;&quot;
+    
+    # Guard Clause: Guest or Unknown
+    if user_type == UserType.GUEST:
+        return amount
+        
+    # Guard Clause: Member
+    if user_type == UserType.MEMBER:
+        if location == Location.FOREIGN:
+            return amount * MEMBER_FOREIGN_FEE_RATE
+        return amount
+
+    # Guard Clause: VIP
+    if user_type == UserType.VIP:
+        if amount &lt;= VIP_THRESHOLD:
+            return amount * VIP_LOW_AMT_RATE
+            
+        # VIP High Amount Logic
+        if location == Location.FOREIGN:
+            return amount * VIP_HIGH_AMT_FOREIGN_RATE
+        return amount * VIP_HIGH_AMT_LOCAL_RATE
+
+    # Fallback
+    return amount
+</code></pre>
+<h3><strong>5. 结果验证与指标对比</strong></h3>
+<p>重构代码部署后，必须通过双重验证：回归测试与静态分析。</p>
+<h4><strong>5.1 逻辑一致性验证</strong></h4>
+<p>运行阶段二生成的 <code>pytest</code> 套件（需适配新的函数名或使用适配器模式调用新函数）。</p>
+<ul>
+<li><strong>结果</strong>: PASSED。</li>
+<li><strong>结论</strong>: 业务逻辑在重构过程中完全保留，未发生漂移。</li>
+</ul>
+<h4><strong>5.2 复杂度指标对比 (Radon Metrics)</strong></h4>
+<table>
+<thead>
+<tr>
+<th><strong>指标</strong></th>
+<th><strong>原始代码 (Legacy)</strong></th>
+<th><strong>重构后代码 (Refactored)</strong></th>
+<th><strong>变化幅度</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LOC (Lines of Code)</strong></td>
+<td>15</td>
+<td>32 (含常量定义)</td>
+<td>+113% (以空间换清晰度)</td>
+</tr>
+<tr>
+<td><strong>Cyclomatic Complexity</strong></td>
+<td>6 (B级)</td>
+<td>3 (A级)</td>
+<td><strong>-50%</strong></td>
+</tr>
+<tr>
+<td><strong>Halstead Volume</strong></td>
+<td>120.5</td>
+<td>98.2</td>
+<td>-18.5%</td>
+</tr>
+<tr>
+<td><strong>Cognitive Complexity</strong></td>
+<td>High</td>
+<td>Low</td>
+<td>显著降低</td>
+</tr>
+</tbody></table>
+<h3><strong>6. 风险评估与局限性 (Risk Assessment)</strong></h3>
+<p>尽管流程自动化程度高，但工程团队需注意以下内生风险：</p>
+<ol>
+<li><strong>上下文截断 (Context Truncation)</strong>:
+当重构对象依赖外部全局变量或复杂的类状态时，如果仅提供函数片段，LLM 可能产生错误的假设。</li>
+</ol>
+<ul>
+<li><ul>
+<li><em>缓解策略</em>: 提供完整的 Class 定义或依赖树。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><strong>过度拟合 (Overfitting)</strong>:
+生成的测试用例仅覆盖了当前代码的逻辑（即使该逻辑本身是错误的）。</li>
+</ol>
+<ul>
+<li><ul>
+<li><em>缓解策略</em>: 区分“重构（Refactoring）”与“修复 Bug（Bug Fixing）”。本文档流程仅涵盖重构，修复 Bug 需作为独立步骤执行。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><strong>幻觉 (Hallucination)</strong>:
+LLM 偶尔会引入不存在的库或语法。</li>
+</ol>
+<ul>
+<li><ul>
+<li><em>缓解策略</em>: 必须集成 Pylint/Mypy 到 CI 流水线中，自动拦截无效代码。</li>
+</ul>
+</li>
+</ul>
+<h3><strong>7. 结论</strong></h3>
+<p>将 AI 引入遗留代码治理，本质上是将**认知成本（Cognitive Load）**外包给模型的计算成本。通过建立“测试-重构-验证”的标准化流水线，工程团队可以将处理遗留代码的时间成本降低 40%-60%。该方案已具备在生产环境中大规模落地的可行性。</p>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[独行东京 #01：东新宿火灾事件]]></title>
+      <link>https://www.7rees.cc/articles/interest-4</link>
+      <guid isPermaLink="false">interest-4</guid>
+      <pubDate>Wed, 24 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[interest]]></category>
+      <description><![CDATA[独行东京 #01：东新宿火灾事件]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>去日本之前没告诉任何人。</p>
+<p>4月25日递交了辞呈，当晚就下单了日本的旅游签，可惜后面撞上了劳动节，领事馆不上班，足足等到5月13日才下签。</p>
+<p>不过反正也是头脑一热的冲动，没有规划行程和时间，这也是一个人旅行的好处。</p>
+<p>买的国泰航空的航班（不得不说国泰的餐食甩了国内航司两条街），飞机从杭州中转香港飞抵东京羽田。</p>
+<p>落地时夜幕已沉，在飞驰的山手线电车上，我看着窗外流动的东京夜色，心里升起一种久违的兴奋——那是即将窥见又一座异国城市的雀跃。  </p>
+<p>酒店定在了东新宿——是的，就是那个大名鼎鼎的歌舞伎町一番街所在的东新宿，入住第一天便碰上了超级drama的事件。</p>
+<p>落地就已经很晚，抵达酒店收拾停当，到直到快2点钟才睡下。睡了不到半小时，迷迷糊糊听到了有警报声和广播声，起初没有太在意（因为实在太困了），停了一会广播声和警报声再次响起，声音大到我没办法做到继续死睡。</p>
+<p>我几乎不懂日语，好死不死这广播只说日语。只好拿出手机翻译器录了一段，看到翻译出来的结果差点没给我吓死。</p>
+<p>“发生了二次火灾，请冷静避难。”</p>
+<p>心脏骤停。</p>
+<p>我慌忙套上衣服推门探查，走廊里已经站了不少人。  </p>
+<p>隔壁一对情侣率先发问，Are you smoking in room？</p>
+<p>No，我回答。</p>
+<p>接着对面房间也加入到了讨论，一致决定拿着东西赶紧跑路。</p>
+<p>有趣的是，直到我们顺着紧急通道跑到地面，聚在一起交流时才发现，原来大家都是中国人。四个中国人在日本街头，用英语煞有介事地对话了半天，场面滑稽得有些荒诞。</p>
+<div style="display: flex; gap: 10px; justify-content: center;">
+  <img src="https://s2.loli.net/2025/12/23/kal6ObTuYRcDVAe.webp" style="width: 32%; object-fit: cover;">
+  <img src="https://s2.loli.net/2025/12/23/oDqruOGYHWB9pZ5.webp" style="width: 32%; object-fit: cover;">
+  <img src="https://s2.loli.net/2025/12/23/nWDh2CfRsbU4uz7.webp" style="width: 32%; object-fit: cover;">
+</div>
+
+<p>我们在凌晨的东京街头等来了消防车。几个消防员进楼排查一番后，大家才获准回房。后来了解了一下，原来日本的消防法规极其严苛，浴室蒸汽或者烟味都极易触发那套敏感的报警系统。</p>
+<p>好在是虚惊一场。</p>
+<p>刚落地还发了个朋友圈“开始了，小x的奇妙冒险”，这下真是冒上险了。</p>
+<p><img src="https://s2.loli.net/2025/12/23/AvXGTtDBEsQ6ywb.webp" alt="朋友圈"></p>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[更新日志]]></title>
+      <link>https://www.7rees.cc/articles/changlog</link>
+      <guid isPermaLink="false">changlog</guid>
+      <pubDate>Tue, 23 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[tech]]></category>
+      <description><![CDATA[更新日志]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <h3><strong>更新日志</strong></h3>
+<hr>
+<p><strong>[1.2.0] - 2025-12-26</strong></p>
+<ul>
+<li>新增RSS Feed链接。</li>
+<li>修复了一些已知问题。</li>
+</ul>
+<hr>
+<p><strong>[1.1.0] - 2025-12-26</strong></p>
+<ul>
+<li>新增新年彩蛋按钮。</li>
+</ul>
+<hr>
+<p><strong>[1.0.0] - 2025-12-25</strong></p>
+<p>🎄圣诞节快乐</p>
+<ul>
+<li>7rees.cc正式上线。</li>
+<li>修复了评论区因跨域问题无法加载的问题。</li>
+</ul>
+<hr>
+<p><strong>[0.4.0-Beta] - 2025-12-23</strong></p>
+<p>正式上线前最后一个大版本。</p>
+<ul>
+<li>重构导航栏，删除Projects，新增About。</li>
+<li>新增图片灯箱，点击可放大查看正文中的图片。</li>
+<li>修复最近在读什么中的图书封面显示。</li>
+<li>优化移动端显示。</li>
+</ul>
+<hr>
+<p><strong>[0.3.2-Beta] - 2025-12-23</strong></p>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了正文无法渲染HTML代码的问题。</li>
+<li>修复了其他已知问题。</li>
+</ul>
+<hr>
+<p><strong>[0.3.1-Beta] - 2025-12-21</strong></p>
+<p><strong>优化</strong></p>
+<ul>
+<li>优化了交换链接的显示体验。</li>
+<li>优化了Shields.io在正文中渲染效果不佳的问题。</li>
+</ul>
+<hr>
+<p><strong>[0.3.0-Beta] - 2025-12-20</strong></p>
+<p><strong>新增</strong></p>
+<ul>
+<li>新增了留言板功能，使用的是Artalk的自托管方案。</li>
+</ul>
+<hr>
+<p><strong>[0.2.1-Beta] - 2025-12-19</strong></p>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了当文章正文和页面整体因为代码块过长而产生水平晃动或白边的问题。</li>
+<li>今天才得知没有居住证或暂住证的情况下无法异地ICP备案，<del>OK此贴终结</del>果断放弃刚买的阿里云ECS转投AWS EC2.</li>
+</ul>
+<hr>
+<p><strong>[0.2.0-Beta] - 2025-12-18</strong></p>
+<p><strong>新增</strong></p>
+<ul>
+<li>新增了置顶功能。</li>
+<li>新增返回顶部的功能。</li>
+</ul>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了Home页邮箱图标点击事件无法正确跳转的问题。</li>
+<li>修复切换语言后，页面刷新自动还原为中文的问题。</li>
+<li>使用了更精致的Favicon。</li>
+</ul>
+<hr>
+<p><strong>[0.1.0-Beta] - 2025-12-17</strong></p>
+<p><strong>新增</strong></p>
+<ul>
+<li>完成整体页面设计。</li>
+</ul>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了社交图标显示问题。</li>
+<li>修复技术类文章详情页点击「返回文章」后，错误跳转至兴趣文章列表的问题。</li>
+<li>采用临时IP指向方案，保障测试阶段访问。</li>
+</ul>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[这里的湖水温柔得多]]></title>
+      <link>https://www.7rees.cc/articles/interest-3</link>
+      <guid isPermaLink="false">interest-3</guid>
+      <pubDate>Tue, 23 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[interest]]></category>
+      <description><![CDATA[这里的湖水温柔得多]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>6月份从杭州跳槽来到南京，转眼竟已经半年了。虽然过去常来旅游，但还是第一次生活在这里这么久。</p>
+<p>以前偏爱南京 ，尤其是大学的时候。一是距离相当近，不费什么周章；二来学生时期小布尔乔亚文青病发作得最厉害，很喜欢南京的历史底蕴与人文余温 。来了许多次之后愈发的喜欢，一直将其视为理想的工作和居住城市。但是好死不死实习工作和毕业签的第一份工作都错过了南京。</p>
+<p>22年在杭州实习了半年，对杭州的初印象是繁荣和新生。这座城市从G20峰会之后开始快速发展，整个城市面貌都是焕然一新、欣欣向荣的。</p>
+<p>我常和好友互相打趣，你若是没钱，杭州只是杭州，你若是有钱，杭州才是真正的杭州。也算是对我们微薄实习工资的自嘲。</p>
+<p>离开杭州不到两年就又回去了，果真是缘分未尽吧。这一次在那里工作生活了一年还多，但心境却完全不同了。</p>
+<p>实习的时候，有多个好友在身边，整天嬉笑怒骂虽然收入堪忧但是相当幸福。而这次是我独自勇闯杭州，刚去的时候落魄到住在青旅，这么长时间也没交到什么交心的朋友，个人生活被工作时间侵占挤压，甚至还谈了一段刻骨铭心但不到四个月就无疾而终的恋爱，使我备受打击。</p>
+<p>这一次杭州给我的印象是繁华、开放、包容，但多了点孤独，少了点人情。杭州是不排斥新事物的产生和发展的，他容许不同思想、文化自由地碰撞、融合，不断让自己新生。代价是钢铁的森林、汹涌的车流和慢不下来的人流，我没有办法停下来去好好感受我的人生。</p>
+<p>于是我决定离开那里。</p>
+<p>来到南京后的这半年，日子过得慢了许多。</p>
+<p>没有了杭州那种仿佛要把每分每秒都变现的焦灼感，我终于能慢腾腾地在梧桐树影下走一走。我开始习惯在周末去逛那些早就在地图上收藏好的书店，或者只是在玄武湖边漫无目的地吹吹风。</p>
+<p>虽然偶尔也会想起杭州。想起在西湖边漫步的傍晚，想起龙井路层层叠叠的绿，想起曾与我交集的形形色色的人，还有那座城市永远透着的一股不服输的生命力。其实我怀念的或许不是那里的生活，而是实习时那段即便窘迫却有人并肩作战的岁月，和那个初出茅庐、对未来满是憧憬的自己。只是那种热闹和新鲜感，终究在后来那一年的孤独和疲惫中被消磨掉了。</p>
+<p>如今，曾经理想的城市真正住进来，滤镜也随之碎了一地，露出它接地气、甚至琐碎的一面，不再仅仅是大学记忆里那个笼罩着人文光环的滤镜。但我并不失望，在这里，我起码能找回一点生活的主权。那些曾经被工作和孤独挤压掉的自我，正一点点在烟火气和秦淮河的晚风里缝补回来。</p>
+<p>我不知道自己会在南京待多久，也不敢确信这里就是终点。但起码此刻，我不再是被车流裹挟的零件，而是一个可以随时停下来，看一片叶子落下的路人。</p>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[读书笔记]]></title>
+      <link>https://www.7rees.cc/articles/3</link>
+      <guid isPermaLink="false">3</guid>
+      <pubDate>Mon, 22 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[interest]]></category>
+      <description><![CDATA[读书笔记]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <h3>最近在读什么？</h3>
+<div class="book-shelf">
+  <!-- Book 1: 红楼梦 -->
+  <div class="book-card group">
+    <div class="book-cover-wrapper">
+      <img src="/images/book1.jpg" class="book-cover-img" alt="Dream of the Red Chamber" />
+    </div>
+    <div class="book-title">红楼梦</div>
+    <div class="book-meta">曹雪芹 / 小说</div>
+    <div class="book-progress-info">
+      <span class="book-progress-label">Reading</span>
+      <span class="book-progress-percent">28%</span>
+    </div>
+    <div class="book-progress-bar">
+      <div class="book-progress-inner" style="width: 28%"></div>
+    </div>
+  </div>
+  <!-- Book 2: 克林索尔的最后夏天 -->
+  <div class="book-card group">
+    <div class="book-cover-wrapper">
+      <img src="/images/book2.jpg" class="book-cover-img" alt="Klingsors Letzter Sommer" />
+    </div>
+    <div class="book-title">克林索尔的最后夏天</div>
+    <div class="book-meta">赫尔曼·黑塞 / 小说</div>
+    <div class="book-progress-info">
+      <span class="book-progress-label">Reading</span>
+      <span class="book-progress-percent">16%</span>
+    </div>
+    <div class="book-progress-bar">
+      <div class="book-progress-inner" style="width: 16%"></div>
+    </div>
+  </div>
+  <!-- Book 3: 一只特立独行的猪 -->
+  <div class="book-card group">
+    <div class="book-cover-wrapper">
+      <img src="/images/book3.jpg" class="book-cover-img" alt="A Maverick Pig" />
+    </div>
+    <div class="book-title">一只特立独行的猪</div>
+    <div class="book-meta">王小波 / 杂文</div>
+    <div class="book-progress-info">
+      <span class="book-progress-label">Reading</span>
+      <span class="book-progress-percent">17%</span>
+    </div>
+    <div class="book-progress-bar">
+      <div class="book-progress-inner" style="width: 17%"></div>
+    </div>
+  </div>
+</div>
+
+<p>真正的成就是自己争取来的，而不是分配来的东西。</p>
+<div align="right">——王小波《一只特立独行的猪》</div>
+
+<p>一个女孩子来到人世间，应该像男孩一样，有权利寻求她所要的一切。假如她所得到的正是她所要的，那就是最好的——假如我是她的父亲，我也别无所求了。</p>
+<div align="right">——王小波《一只特立独行的猪》</div>
+
+<p>从我懂事的年龄起，就常听人们说：我们这一代，生于一个神圣的时代，多么幸福；而且肩负着解放天下三分之二受苦人的神圣使命，等等。同年龄的人听了都很振奋，很爱听，但我总有点疑问，这么多美事怎么都叫我赶上了。</p>
+<div align="right">——王小波《沉默的大多数》</div>
+
+<p>作为一个知识分子，我对信念的看法是：人活在世上，自会形成信念。对我本人来说，学习自然科学、阅读文学作品、看人文科学的书籍，乃至旅行、恋爱，无不有助于形成我的信念，构造我的价值观。</p>
+<div align="right">——王小波《沉默的大多数》</div>
+
+<p>“非功利性读书看似漫无目的，但它的目的就是无功利，就是让人逃离工具主义的牢笼……它可以让我们与人类伟大的先贤对话，在历史的时空中获得关于人生的智慧，感悟人生的意义，拥有对抗无常的力量。</p>
+<div align="right">——赵宏、陈碧、李红勃、罗翔《不止于正义》</div>
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[关于 React Hooks 心智模型演进的个人技术叙事]]></title>
+      <link>https://www.7rees.cc/articles/2</link>
+      <guid isPermaLink="false">2</guid>
+      <pubDate>Wed, 17 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[tech]]></category>
+      <description><![CDATA[关于 React Hooks 心智模型演进的个人技术叙事]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>我最初接触 Hooks 时，将其视为对生命周期方法的函数式语法糖。这种浅层认知持续了相当一段时间，直至在复杂业务场景中遭遇逻辑复用的瓶颈。本文将系统阐述我个人对 React 技术范式，特别是 Hooks 设计哲学的理解演进过程。</p>
+<h2>第一阶段：生命周期映射期（认知表层）</h2>
+<p>早期使用类组件时，我的思维完全被生命周期方法所主导。组件逻辑被强制分散于 <code>componentDidMount</code>、<code>componentDidUpdate</code> 和 <code>componentWillUnmount</code> 等钩子中，导致相关关注点被物理分离。例如，一个数据订阅功能需要在 <code>componentDidMount</code> 中建立连接，在 <code>componentDidUpdate</code> 中处理参数变化，在 <code>componentWillUnmount</code> 中清理资源。这种时间轴驱动的编程模型，迫使开发者必须在脑内构建组件的时间线，并手动保证状态同步的一致性。</p>
+<h2>第二阶段：副作用同步期（范式转换）</h2>
+<p>Hooks 的引入，特别是 <code>useEffect</code>，代表了一种根本性的范式转移。我逐渐理解到，Hooks 的核心价值不在于 “何时执行代码”，而在于如何建立状态与副作用之间的同步关系。每个 <code>useEffect</code> 都是对系统的一种声明：“当这些特定依赖项发生变化时，请执行此同步逻辑以匹配外部系统。”</p>
+<p>这种认知转变带来了代码组织的革新。我不再思考 “挂载时做什么”，而是思考 “这个副作用需要与哪些状态保持同步”。例如，一个聊天组件的连接逻辑，从生命周期方法中解耦出来，成为一个自包含的同步单元：</p>
+<pre><code class="language-javascript">// 传统生命周期方法（关注时间点）
+class ChatComponent extends React.Component {
+  componentDidMount() {
+    this.setupConnection(this.props.roomId);
+  }
+  
+  componentDidUpdate(prevProps) {
+    if (prevProps.roomId !== this.props.roomId) {
+      this.cleanupConnection();
+      this.setupConnection(this.props.roomId);
+    }
+  }
+  
+  componentWillUnmount() {
+    this.cleanupConnection();
+  }
+}
+
+// Hooks 范式（关注同步关系）
+function ChatComponent({ roomId }) {
+  useEffect(() =&gt; {
+    const connection = createConnection(roomId);
+    connection.connect();
+    
+    // 清理函数定义了如何中断同步
+    return () =&gt; connection.disconnect();
+  }, [roomId]); // 依赖数组定义了同步触发的条件
+}
+</code></pre>
+<h2>第三阶段：渲染逻辑与副作用分离期（架构意识）</h2>
+<p>随着对 Hooks 理解的深入，我逐渐认识到 React 团队在设计上的深层意图：将渲染逻辑与副作用彻底分离。渲染应当是一个纯函数，仅负责将状态映射为虚拟 DOM。所有与外部系统的交互（数据获取、订阅、DOM 操作）都应通过 <code>useEffect</code> 进行编排。</p>
+<p>这一认知促使我重新评估代码结构。我学会了区分：</p>
+<ul>
+<li>事件处理函数：处理用户交互，可以包含副作用，但应当是明确的、由用户触发的</li>
+<li>渲染逻辑：必须是纯的、可预测的状态到 UI 的映射</li>
+<li>同步副作用：通过 <code>useEffect</code> 声明，自动响应状态变化</li>
+</ul>
+<h2>第四阶段：自定义 Hook 作为抽象工具期（工程实践）</h2>
+<p>自定义 Hooks 的出现，代表了我对 React 理解的一个飞跃。这不仅仅是代码复用的工具，更是逻辑关注点分离的实现手段。我意识到，一个设计良好的自定义 Hook 应当：</p>
+<ol>
+<li>封装单一、完整的逻辑单元</li>
+<li>提供清晰的输入输出接口</li>
+<li>内部管理其自身状态和生命周期</li>
+</ol>
+<p>例如，实现一个数据获取的 Hook：</p>
+<pre><code class="language-javascript">// 初级实现：逻辑与组件耦合
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() =&gt; {
+    let cancelled = false;
+    
+    setLoading(true);
+    fetchUser(userId).then(data =&gt; {
+      if (!cancelled) {
+        setUser(data);
+        setLoading(false);
+      }
+    });
+    
+    return () =&gt; { cancelled = true; };
+  }, [userId]);
+  
+  // 渲染逻辑...
+}
+
+// 高级抽象：自定义 Hook 封装完整逻辑单元
+function useUser(userId) {
+  const [state, setState] = useState({
+    data: null,
+    loading: true,
+    error: null
+  });
+  
+  useEffect(() =&gt; {
+    let cancelled = false;
+    
+    setState(s =&gt; ({ ...s, loading: true }));
+    
+    fetchUser(userId)
+      .then(data =&gt; {
+        if (!cancelled) {
+          setState({ data, loading: false, error: null });
+        }
+      })
+      .catch(error =&gt; {
+        if (!cancelled) {
+          setState({ data: null, loading: false, error });
+        }
+      });
+    
+    return () =&gt; { cancelled = true; };
+  }, [userId]);
+  
+  return state;
+}
+
+// 组件变得极其简洁
+function UserProfile({ userId }) {
+  const { data: user, loading, error } = useUser(userId);
+  // 纯粹的渲染逻辑
+}
+</code></pre>
+<h2>第五阶段：并发模式下的思维演进（前沿认知）</h2>
+<p>React 18 引入的并发特性，迫使我进一步升级心智模型。在并发渲染中，组件可能被多次渲染但只提交一次结果，也可能在高优先级更新中断低优先级渲染。这意味着：</p>
+<ul>
+<li>副作用必须具有幂等性，能够安全地多次执行</li>
+<li>状态更新可能需要区分优先级（<code>startTransition</code>， <code>useDeferredValue</code>）</li>
+<li>渲染不再是线性的、确定性的时间线</li>
+</ul>
+<p>我逐渐学习到，在并发世界中，组件应该像纯函数一样，能够随时被中断和重新开始。这要求副作用逻辑具有更高的健壮性，状态更新更加细粒度。</p>
+<h2>技术见解与反思</h2>
+<ol>
+<li>闭包是核心机制，而非实现细节：Hooks 的强大能力建立在 JavaScript 闭包基础上。每个渲染 “帧” 都有其独立的闭包作用域，这既是 Hooks 灵活性的来源，也是依赖项数组必要性的根本原因。</li>
+<li>状态不变性是性能优化的基石：React 的渲染优化（<code>React.memo</code>， <code>useMemo</code>， <code>useCallback</code>）都依赖于对状态变更的快速检测。深层不可变数据结构和精细的状态分割，是构建高性能 React 应用的前提。</li>
+<li>副作用是必要的复杂性：虽然 React 鼓励纯函数式组件，但 UI 开发本质上是与充满副作用的现实世界交互。Hooks 的价值在于为这种复杂性提供了声明式的管理工具，而非消除复杂性本身。</li>
+<li>类型系统是规模化开发的必需品：TypeScript 与 React 的结合，使得 Hooks 的契约（输入输出类型）能够被静态验证。这在大型应用中显著降低了认知负荷和维护成本。</li>
+</ol>
+<h2>结语</h2>
+<p>React 的技术演进，特别是 Hooks 的引入，不仅仅是一套新的 API，更是一种对 UI 开发本质的重新思考。它推动开发者从 “时间驱动” 的思维模式转向 “状态驱动” 和 “同步驱动” 的模式。这种转变是渐进的，需要在实际项目中反复实践和反思才能内化。</p>
+<p>对我而言，掌握 React 不是学习一套语法，而是接受一种新的 UI 构建哲学：UI 是状态的函数，而副作用是状态与外部世界的同步桥梁。这一认知转变，远比任何具体 API 的使用技巧更为重要和持久。</p>
+<hr>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[他死于太过诚实的阳光]]></title>
+      <link>https://www.7rees.cc/articles/interest-1</link>
+      <guid isPermaLink="false">interest-1</guid>
+      <pubDate>Mon, 15 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[interest]]></category>
+      <description><![CDATA[他死于太过诚实的阳光]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>南京这几天的阴雨，总让人觉得骨子里透着一层冷意，走在中山路上，满目都是梧桐树凋零后的枯索。铅灰色的云低低地压在半空，这种天气总让我想起阿尔及尔那场刺眼的、粘稠的、最终酿成命案的阳光。</p>
+<p>刚读完加缪的《局外人》，这种感觉很奇特——书并不厚，却像是一块被磨得极其尖锐的冰，不声不响地刺穿了日常生活中那些温热的假象。</p>
+<p>关于这部作品，最广为人知的标签莫过于“荒诞”。但我合上书，脑子里挥之不去的却是一个词：生理性真实。</p>
+<p>人们习惯于把默尔索解读为一个对抗世俗的英雄，但我更愿意把他看作一个拒绝进化的、极度诚实的“感官动物”。</p>
+<p>他并不是故意要在母亲的葬礼上表现得冷漠。对他而言，漫长的守灵、刺眼的阳光、脚下发烫的柏油路，这些生理上的不适感远比“丧母之痛”这种抽象的情绪要真实得多。他不去表演悲伤，是因为他当时的身体确实只感受到了疲惫。</p>
+<p>这其实是一件很冒犯人的事情。我们所在的社会有一套极其严密的“情绪模板”：葬礼上该流泪，求婚时该狂喜，升迁时该志得意满。默尔索的罪名，本质上不是他开了那五枪，而是他切断了身体与这些社会情绪之间的联动。他只对海水、阳光、性交和香烟有反应，而对“意义”过敏。</p>
+<p>书中最关键的那场谋杀，我反复读了好几遍。</p>
+<p>在阿尔及尔的海滩上，加缪把阳光写得像是一把利刃。默尔索开枪，不是出于仇恨，甚至不是出于自卫，那仅仅是一次感官过载后的生理崩溃。阳光太晃眼了，汗水流进了眼睛，在那一刻，世界失去了逻辑，只剩下一种无法排遣的焦灼。</p>
+<p>这恰恰是全书最让人不安的地方。我们习惯于给所有的恶行找一个动机——为了钱，或者为了爱。有了动机，社会就觉得这个世界还在掌控之中。</p>
+<p>但默尔索给出的答案是“因为阳光”。这个答案太荒诞了，它揭示了一个令人胆寒的真相：<strong>人类所谓的文明和秩序，在偶然的生理冲动面前，脆弱得不堪一击</strong>。</p>
+<p>后半段的审判，默尔索彻底变成了一个旁观者，一个真正的“局外人”。</p>
+<p>法官、检察官、甚至他自己的律师，他们在那场华丽的辞藻辩论中，拼命地想要给默尔索的行为缝合上一套合理的逻辑。他们揪着他在葬礼上没哭、喝了咖啡、抽了烟这些细节不放，强行把他塑造成一个丧心病狂的恶魔。</p>
+<p>这种围猎感在现实中随处可见。我们无法容忍一个人的行为是没有逻辑的。如果一个杀人犯没有动机，那意味着我们每个人都有可能在某个瞬间变成杀人犯，或者无端地死于非命。为了维持“世界是有序的”这一幻觉，社会必须杀掉默尔索。</p>
+<p><strong>他必须死，因为他证明了人生的无序</strong>。</p>
+<p>默尔索在临刑前拒绝了神父。那一刻的爆发，是我全书最心潮澎湃的时刻。</p>
+<p>他意识到这个世界对他如此相像，也如此冷漠。这种冷漠不是一种敌意，而是一种坦然。既然星星和大地并不在意他的生死，那他也就不再需要对任何人的道德期待负责。</p>
+<p>在这个被各种“正确”和“必选项”填满的时代，默尔索这种近乎自毁的坦率，反倒像是一剂清醒剂。他没有试图拯救谁，他只是拒绝在死前最后一次撒谎。</p>
+<p>我们每个人都在小心翼翼地维持着某种“合群”的姿态，计算着每一句话的得体程度。而默尔索像是一面不带任何滤镜的镜子，照出了我们身上那些为了生存而不得不进行的、日复一日的表演。</p>
+<p><strong>在这个冷漠的世界里，你并不欠任何人一个解释</strong>。</p>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[我建议TGA明年停办]]></title>
+      <link>https://www.7rees.cc/articles/interest-2</link>
+      <guid isPermaLink="false">interest-2</guid>
+      <pubDate>Thu, 11 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[interest]]></category>
+      <description><![CDATA[我建议TGA明年停办]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>说真的，看完今年的颁奖礼，我唯一的感想就是建议 TGA 明年原地解散。</p>
+<p>以前我觉得 TGA 是“游戏界的奥斯卡”，现在看它更像是《33远征军》的庆功年会。真的，干脆别叫The Game Awards了，改名叫The 33rd Expedition Awards算了。看这架势，我都怀疑评委席是不是全被远征军给编排了，从年度游戏到最佳叙事，从最佳RPG到最佳独立游戏，大奖小奖一锅端，不知道的还以为今年全世界就出了这一款游戏，别的游戏连口汤都没喝上。</p>
+<p>最心疼的还是小岛秀夫，这大哥每年准时报到，西装笔挺地坐在台下，被同一游戏反复碾压到气笑。TGA缺流量了就请小岛出来走两步，发个预告，搞个互动，等到了真正分蛋糕的时候，小岛手里的盘子比他的游戏剧本都空。下次直接给岛主搬个按摩椅坐台下吧，起码坐得舒服点。</p>
+<p><img src="https://s2.loli.net/2025/12/18/4LN3BoWwJEft5Y6.webp" alt="小岛.webp"></p>
+<p>还有《天国拯救 2》，战马工作室那群老哥辛辛苦苦在波希米亚搬了半天砖，把中世纪还原得连空气都透着那股味儿，结果跑来洛杉矶陪跑了一整晚，提名拿了不少，奖项颗粒无收，主打一个重在参与。这种硬核的浪漫在这一届评委眼里可能还不如远征军的一块勋章。看着这些真正有灵魂的作品在那儿白忙活，我甚至觉得台上的奖杯都在尴尬地发抖。</p>
+<p>如果明年的 TGA 还是这种一人得道，全家白跑的画风，那真没必要办了。省下那点电费和场地费，让小岛秀夫多剪两个预告片，让战马工作室多修几个BUG，对玩家的心理健康可能贡献更大。</p>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+</channel>
+</rss>

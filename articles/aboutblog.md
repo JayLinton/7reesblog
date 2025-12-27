@@ -18,7 +18,7 @@ hidden: true
 
 
 
-本站由AWS 亚马逊云EC2提供云计算服务，由阿里云DNS提供解析服务，由Cloudflare提供CDN全球内容分发服务；评论功能由Artalk提供支持，自托管于阿里云ESC云服务器，使用Docker进行部署。
+本站由AWS 亚马逊云EC2提供云计算服务，由Cloudflare提供域名托管及CDN全球内容分发服务；评论功能由Artalk提供支持，自托管于阿里云ECS云服务器，使用Docker进行部署。
 
 
 **由衷感谢您的访问。**
