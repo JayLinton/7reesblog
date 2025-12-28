@@ -5,11 +5,9 @@ import { Footer } from '../components/Footer';
 import { friendLinksData, usefulLinksData } from '../data/links';
 import { Language } from '../types';
 
-// Artalk 实例类型定义
 declare var Artalk: any;
 
 const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
-  // 使用 sessionStorage 持久化 Tab 状态
   const [tab, setTab] = useState<'friends' | 'comments' | 'useful'>(() => {
     const savedTab = sessionStorage.getItem('7rees-links-tab');
     return (savedTab as any) || 'friends';
@@ -19,12 +17,10 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
   
   const getTheme = () => document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 
-  // 1. 监听 Tab 变化并存储
   useEffect(() => {
     sessionStorage.setItem('7rees-links-tab', tab);
   }, [tab]);
 
-  // 2. 监听主题变化并实时应用到 Artalk
   useEffect(() => {
     const observer = new MutationObserver(() => {
       if (artalkRef.current) {
@@ -35,7 +31,6 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
     return () => observer.disconnect();
   }, []);
 
-  // 3. Artalk 初始化逻辑
   useEffect(() => {
     if (tab === 'comments') {
       const loadArtalk = async () => {
@@ -91,7 +86,6 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
       exit={{ opacity: 0 }}
       className="min-h-screen pt-28 md:pt-40 px-6 max-w-3xl mx-auto flex flex-col"
     >
-      {/* 极简 Tab 导航 */}
       <div className="flex justify-center gap-8 md:gap-16 mb-16 md:mb-20 flex-wrap">
         {[
           { id: 'friends', zh: '友情链接', en: 'FRIENDS' },
@@ -187,19 +181,19 @@ const LinksView: React.FC<{ lang: Language }> = ({ lang }) => {
           <p className="text-[12px] text-gray-400 dark:text-neutral-600 font-light tracking-[0.4em] mb-6 uppercase">
             {lang === 'zh' ? '交换链接' : 'EXCHANGE LINKS'}
           </p>
-          <div className="text-[10px] text-gray-400 dark:text-neutral-500 tracking-[0.15em] leading-loose uppercase">
+          <div className="text-[10px] text-gray-400 dark:text-neutral-500 tracking-[0.15em] font-light leading-loose uppercase">
             <p className="text-neutral-600 dark:text-neutral-400 mb-3 select-all">
-              7rees / 自由流动的树 / HTTPS://WWW.7REES.CC / <a href="https://s2.loli.net/2025/12/25/qf3ZGRr6iuCgO2e.jpg" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white underline underline-offset-4 decoration-neutral-200 dark:decoration-neutral-800 transition-colors">[AVATAR]</a>
+              7rees / 自由如飞鸟 / HTTPS://WWW.7REES.CC / <a href="https://s2.loli.net/2025/12/25/qf3ZGRr6iuCgO2e.jpg">[AVATAR]</a>
             </p>
             <p className="opacity-50">Format: Name / Title / URL / Avatar</p>
             <p>Send to: <a href="mailto:1063750098@qq.com" className="hover:text-black dark:hover:text-white underline decoration-gray-300 dark:decoration-neutral-700 underline-offset-4">1063750098@qq.com</a></p>
             <p className="opacity-50">
-              {lang === 'zh' ? '或直接在留言板页面留言' : 'Or leave a comment on the Guestbook'}
+              {lang === 'zh' ? '或直接在留言板页面留言' : 'Or leave a comment on the Guestbook.'}
             </p>
           </div>
         </div>
       )}
-      <Footer className="mt-20" />
+      <Footer className="mt-20" lang={lang} />
     </motion.div>
   );
 };

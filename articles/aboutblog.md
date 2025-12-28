@@ -10,6 +10,8 @@ hidden: true
 
 ### **关于7rees.cc**
 
+{SITE_STATS}
+
 2020年底曾使用Hexo框架和Butterfly主题搭建过名为“琴瑟在御”的个人网站，后因个人水平有限难以将框架改造成自己心目中的模样，运营一年后因域名到期而终结。
 
 时隔近5年，个人也从前端开发转至测试。偶然刷到了某站某篇写的相当不错的文章，又重燃了建站的念头。
@@ -34,6 +36,8 @@ hidden: true
 [EN_START]
 
 ### **About 7rees.cc**
+
+{SITE_STATS}
 
 At the end of 2020, I built a personal website named "Laihsiao" using the Hexo framework and the Butterfly theme. Later, due to my limited technical skills at the time, I found it difficult to customize the framework into the look I envisioned. After one year of operation, the site came to an end as the domain expired.
 

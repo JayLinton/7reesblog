@@ -16,10 +16,39 @@ const AboutView: React.FC<{ lang: Language }> = ({ lang }) => {
   const siteArticle = articlesData.find(a => a.id === '5');
   const currentArticle = activeTab === 'me' ? meArticle : siteArticle;
 
+  // 统计数据计算
+  const stats = useMemo(() => {
+    // 运行天数计算
+    const startDate = new Date('2025-12-12').getTime();
+    const now = Date.now();
+    const daysSince = Math.max(0, Math.floor((now - startDate) / (1000 * 60 * 60 * 24)));
+
+    // 全站字数计算 (统计所有非隐藏文章的中英文标题和正文长度)
+    const totalChars = articlesData.reduce((acc, art) => {
+      if (art.hidden) return acc;
+      const cnLen = (art.titleCN || '').length + (art.contentCN || '').length;
+      const enLen = (art.titleEN || '').length + (art.contentEN || '').length;
+      // 我们取较大的一边作为“已落下的叶子”统计
+      return acc + Math.max(cnLen, enLen);
+    }, 0);
+
+    return { daysSince, totalChars };
+  }, []);
+
   const content = useMemo(() => {
     if (!currentArticle) return '';
-    return lang === 'zh' ? currentArticle.contentCN : currentArticle.contentEN;
-  }, [currentArticle, lang]);
+    let raw = lang === 'zh' ? currentArticle.contentCN : currentArticle.contentEN;
+
+    // 占位符动态替换逻辑
+    if (activeTab === 'site') {
+      const statsStr = lang === 'zh' 
+        ? `这片树林在 **${stats.daysSince}** 天里已经落下了 **${stats.totalChars.toLocaleString()}** 字的树叶。`
+        : `This forest has shed **${stats.totalChars.toLocaleString()}** words of leaves over the past **${stats.daysSince}** days.`;
+      raw = raw.replace('{SITE_STATS}', statsStr);
+    }
+
+    return raw;
+  }, [currentArticle, lang, activeTab, stats]);
 
   // 提取正文中的所有图片链接
   const imagesList = useMemo(() => {

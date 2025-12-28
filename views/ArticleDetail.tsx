@@ -20,22 +20,18 @@ const ArticleDetailView: React.FC<{ lang: Language }> = ({ lang }) => {
     return lang === 'zh' ? article.contentCN : article.contentEN;
   }, [article, lang]);
 
-  // 提取正文中的所有图片链接以构建画廊列表
   const imagesList = useMemo(() => {
     const urls: string[] = [];
-    // 匹配 Markdown 图片: ![alt](url)
     const mdRegex = /!\[.*?\]\((.*?)\)/g;
-    // 匹配 HTML 图片: <img ... src="url" ...>
     const htmlRegex = /<img.*?src=["'](.*?)["'].*?>/g;
     
     let match;
     while ((match = mdRegex.exec(content)) !== null) urls.push(match[1]);
     while ((match = htmlRegex.exec(content)) !== null) urls.push(match[1]);
     
-    return Array.from(new Set(urls)); // 去重并保持顺序
+    return Array.from(new Set(urls));
   }, [content]);
 
-  // 键盘导航支持
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (activeImageIndex === null) return;
@@ -89,14 +85,12 @@ const ArticleDetailView: React.FC<{ lang: Language }> = ({ lang }) => {
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="min-h-screen pt-28 md:pt-40 px-6 max-w-2xl mx-auto flex flex-col"
     >
-      {/* 画廊灯箱 */}
       <AnimatePresence>
         {activeImageIndex !== null && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 dark:bg-black/98 backdrop-blur-xl"
           >
-            {/* 关闭按钮 */}
             <button
               className="absolute top-6 right-6 md:top-10 md:right-10 z-[110] p-2 text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
               onClick={() => setActiveImageIndex(null)}
@@ -104,12 +98,10 @@ const ArticleDetailView: React.FC<{ lang: Language }> = ({ lang }) => {
               <X className="w-6 h-6" />
             </button>
 
-            {/* 索引计数 */}
             <div className="absolute top-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.3em] font-mono text-neutral-400">
               {activeImageIndex + 1} / {imagesList.length}
             </div>
 
-            {/* 左右切换按钮 (仅在多图时显示) */}
             {imagesList.length > 1 && (
               <>
                 <button 
@@ -127,7 +119,6 @@ const ArticleDetailView: React.FC<{ lang: Language }> = ({ lang }) => {
               </>
             )}
 
-            {/* 图片主体 */}
             <div className="relative w-full h-full flex items-center justify-center p-4 md:p-20" onClick={() => setActiveImageIndex(null)}>
               <AnimatePresence mode="wait">
                 <motion.img
@@ -178,7 +169,7 @@ const ArticleDetailView: React.FC<{ lang: Language }> = ({ lang }) => {
       <p className="text-gray-200 dark:text-neutral-800 mt-16 text-center text-xs tracking-widest">***</p>
       
       <div className="flex-grow"></div>
-      <Footer className="mt-16" />
+      <Footer className="mt-16" lang={lang} />
     </motion.div>
   );
 };

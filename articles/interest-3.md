@@ -1,7 +1,7 @@
 ---
 id: interest-3
 titleCN: 这里的湖水温柔得多
-titleEN: The lake here is so much tenderer.
+titleEN: The Lake Here is So Much Tenderer.
 date: 2025.12.24
 category: interest
 hidden: false

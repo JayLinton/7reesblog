@@ -5,7 +5,7 @@ export const friendLinksData: FriendLink[] = [
     id: '1',
     name: '7rees',
     title: '自由流动的树',
-    avatar: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAENIntpQ-d_KUk_d1zunZPb9kqOmPtXHgACWDcAAjgIIFbVnCofqV4kczYE.jpg',
+    avatar: 'https://s2.loli.net/2025/12/25/qf3ZGRr6iuCgO2e.jpg',
     url: 'http://www.7rees.cc',
   },
   {
@@ -26,8 +26,22 @@ export const friendLinksData: FriendLink[] = [
     id: '4',
     name: '鹅玉',
     title: '可以原谅猫咪的一切，不是吗',
-    avatar: 'https://ro3or.com/favicon.png',
+    avatar: 'https://favicon.pub/ro3or.com?s=128',
     url: 'https://ro3or.com/',
+  },
+  {
+    id: '5',
+    name: 'ENCOM一号机',
+    title: '1,000 lonely stars | Hiding in the cold',
+    avatar: 'https://media.alanone.top/avatar.jpg',
+    url: 'https://alanone.top/',
+  },
+  {
+    id: '6',
+    name: '伏枥之间',
+    title: '莫听穿林打叶声，何妨吟啸且徐行',
+    avatar: 'https://leehenry.top/friends/my-avatar-portrait.jpg',
+    url: 'https://www.leehenry.top',
   },
 ];
 

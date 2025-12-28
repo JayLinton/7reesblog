@@ -14,6 +14,7 @@ pinned: true
 **[1.2.0] - 2025-12-27**
 
 - 新增RSS Feed链接。
+- 增加了页脚统计运行时间和字数。
 - 修复了一些已知问题。
 
 ---
@@ -102,6 +103,20 @@ pinned: true
 [EN_START]
 
 ### **Changelog**
+
+------
+
+**[1.2.0] - 2025-12-27**
+
+- Added RSS Feed link.
+- Added site runtime and word count statistics to the footer.
+- Fixed some known issues.
+
+------
+
+**[1.1.0] - 2025-12-26**
+
+- Added a New Year's Easter egg button.
 
 ------
 

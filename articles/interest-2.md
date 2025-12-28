@@ -1,7 +1,7 @@
 ---
 id: interest-2
 titleCN: 我建议TGA明年停办
-titleEN: I suggest TGA be cancelled next year
+titleEN: I Suggest TGA be Cancelled Next Year
 date: 2025.12.12
 category: interest
 ---

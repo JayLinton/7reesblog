@@ -5,9 +5,354 @@
   <link>https://www.7rees.cc</link>
   <description>7rees | 自由流动的树</description>
   <language>zh-cn</language>
-  <lastBuildDate>Sat, 27 Dec 2025 07:08:45 GMT</lastBuildDate>
+  <lastBuildDate>Sun, 28 Dec 2025 11:53:42 GMT</lastBuildDate>
   <atom:link href="https://www.7rees.cc/rss.xml" rel="self" type="application/rss+xml" />
   
+    <item>
+      <title><![CDATA[前端包管理技术路线的演化与分野]]></title>
+      <link>https://www.7rees.cc/articles/tech-3</link>
+      <guid isPermaLink="false">tech-3</guid>
+      <pubDate>Sat, 27 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[tech]]></category>
+      <description><![CDATA[前端包管理技术路线的演化与分野]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>在现代前端工程化体系中，包管理工具是保障项目稳定与高效开发的关键基础设施。它们负责自动化地处理项目依赖关系，使得开发者能够复用社区中海量的开源模块。在 JavaScript 生态中，npm、pnpm 与 Yarn 是当前最主流的三个包管理解决方案。</p>
+<p>此文旨在对这三者进行深入的技术剖析，详细阐述其在依赖管理机制、性能、磁盘空间利用率及生态支持等方面的核心差异，为技术选型提供客观依据。</p>
+<h2>包管理工具的核心职责</h2>
+<p>在进行比较之前，有必要明确包管理工具的基本功能。其核心职责包括：</p>
+<ul>
+<li><strong>依赖管理</strong>: 自动化地下载、安装、更新和移除项目所依赖的第三方代码包。</li>
+<li><strong>版本锁定</strong>: 确保在任何开发或部署环境中，项目所安装的依赖版本保持精确一致，规避因版本漂移导致的环境不一致问题。</li>
+<li><strong>脚本执行</strong>: 提供统一的接口，用于运行在 <code>package.json</code> 文件中定义的各类脚本命令（如启动、测试、构建等）。</li>
+<li><strong>包发布与分发</strong>: 支持将项目代码打包并发布至公共或私有仓库，实现代码的共享与复用。</li>
+</ul>
+<h2>npm: Node.js 的标准配置</h2>
+<p>npm (Node Package Manager) 是 Node.js 平台内置的官方包管理工具，拥有当前全球最大的软件注册中心（npm Registry）。</p>
+<h3>依赖管理机制的演进</h3>
+<ol>
+<li><strong>早期版本 (npm v1 &amp; v2): 嵌套 <code>node_modules</code> 结构</strong><ul>
+<li>在此阶段，npm 将每个依赖包及其子依赖完整地嵌套安装于父项目的 <code>node_modules</code> 目录内。</li>
+<li><strong>优势</strong>: 依赖隔离性强，结构清晰，不会产生版本冲突。</li>
+<li><strong>缺陷</strong>:<ul>
+<li><strong>依赖地狱 (Dependency Hell)</strong>: 深层嵌套的依赖关系导致文件目录路径过长，在 Windows 系统上极易超出其最大路径长度限制。</li>
+<li><strong>磁盘空间冗余</strong>: 不同的依赖包若依赖同一模块的相同版本，该模块会被重复下载和存储，造成显著的磁盘空间浪费。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>现代版本 (npm v3+): 扁平化 <code>node_modules</code> 结构</strong><ul>
+<li>为解决上述问题，npm v3 引入了“扁平化”（Flattening）策略。它会分析整个依赖树，并将所有模块（无论层级）尽可能地提升（hoist）到 <code>node_modules</code> 的顶层目录。</li>
+<li><strong>优势</strong>:<ul>
+<li>显著缩短了依赖路径的平均深度。</li>
+<li>通过共享顶层模块，减少了包的重复安装。</li>
+</ul>
+</li>
+<li><strong>缺陷</strong>:<ul>
+<li><strong>不确定性</strong>: <code>node_modules</code> 的最终结构与依赖的安装顺序相关，可能导致不一致性。</li>
+<li><strong>幽灵依赖 (Phantom Dependencies)</strong>: 扁平化结构使得项目代码能够非法访问（<code>require</code>/<code>import</code>）未在 <code>package.json</code> 中明确声明的包（即子依赖），这带来了潜在的维护风险。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>package-lock.json</code> 的引入</strong><ul>
+<li>为解决扁平化带来的不确定性问题，npm v5 引入了 <code>package-lock.json</code> 文件。</li>
+<li>该文件精确地记录了 <code>node_modules</code> 中每个包的确切版本、哈希值、来源和依赖关系拓扑结构。这保证了 <code>npm install</code> 操作的确定性（Determinism）和可复现性。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>Yarn: 性能与稳定性的革新</h2>
+<p>Yarn (Yet Another Resource Negotiator) 由 Facebook (现 Meta) 于 2016 年发布，其直接目标是解决当时 npm 在性能、确定性和安全性方面的不足。</p>
+<h3>核心特性</h3>
+<ol>
+<li><strong>性能优化</strong>:<ul>
+<li><strong>并行安装</strong>: Yarn 能够并行执行依赖的解析和安装任务，与 npm 早期的串行安装相比，显著提升了安装速度。</li>
+<li><strong>离线缓存</strong>: Yarn 维护一个全局缓存。任何被下载过的包都会被存储其中，后续安装时可直接从缓存读取，实现了离线安装并加快了重复安装的速度。</li>
+</ul>
+</li>
+<li><strong><code>yarn.lock</code> 文件</strong>:<ul>
+<li>Yarn 率先引入 lock 文件的概念，其 <code>yarn.lock</code> 作用与 npm 的 <code>package-lock.json</code> 相同，用于锁定依赖树，确保安装的一致性。</li>
+</ul>
+</li>
+<li><strong>工作区 (Workspaces)</strong>:<ul>
+<li>Yarn 提供了对 Monorepo（单体仓库）架构的优秀原生支持。Workspaces 机制可以高效管理仓库内多个项目之间的依赖关系，并统一执行脚本。</li>
+</ul>
+</li>
+<li><strong>Yarn 2+ (Berry) 与 Plug&#39;n&#39;Play (PnP)</strong>:<ul>
+<li>Yarn v2 版本引入了名为 Plug&#39;n&#39;Play (PnP) 的颠覆性依赖管理策略，其核心在于<strong>不再使用 <code>node_modules</code> 目录</strong>。</li>
+<li>PnP 会生成一个 <code>.pnp.cjs</code> 文件，此文件映射了项目中所有依赖包的精确磁盘位置及其依赖关系。Node.js 的模块解析逻辑会被 PnP 接管，直接通过此映射文件定位模块。</li>
+<li><strong>优势</strong>:<ul>
+<li><strong>极致的安装速度</strong>: 省去了生成庞大 <code>node_modules</code> 目录所需的大量 I/O 操作。</li>
+<li><strong>从根本上解决幽灵依赖</strong>: 代码无法引用未在 <code>package.json</code> 中声明的包。</li>
+</ul>
+</li>
+<li><strong>缺陷</strong>:<ul>
+<li><strong>生态兼容性</strong>: PnP 改变了 Node.js 的标准模块解析机制，部分依赖原生 <code>fs</code> 模块或未适配 PnP 的第三方工具可能无法正常工作，需要额外配置。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>pnpm: 兼顾速度与磁盘效率的方案</h2>
+<p>pnpm (performant npm) 旨在以更高效的方式解决 <code>node_modules</code> 带来的问题，其核心设计目标是：<strong>速度最大化</strong>与<strong>磁盘空间利用率最大化</strong>。</p>
+<h3>独特的依赖管理架构</h3>
+<p>pnpm 通过一种创新的方式组织 <code>node_modules</code>，结合了 npm 和 Yarn 的优点。</p>
+<ol>
+<li><strong>内容寻址存储 (Content-addressable Store)</strong>:<ul>
+<li>pnpm 的核心是一个位于用户主目录下的全局内容寻址存储区（<code>~/.pnpm-store</code>）。</li>
+<li>当安装一个包时，pnpm 会将其文件内容下载到此存储区。<strong>系统中任何版本的任何包，其文件实体永远只存储一份</strong>。</li>
+</ul>
+</li>
+<li><strong>符号链接与硬链接驱动的 <code>node_modules</code></strong>:<ul>
+<li>pnpm 创建的是一个<strong>非扁平化</strong>的 <code>node_modules</code> 结构。</li>
+<li>它仅将项目的<strong>直接依赖</strong>通过<strong>符号链接 (symlinks)</strong> 的方式链接到 <code>node_modules</code> 的顶层。</li>
+<li>而所有包（包括直接依赖和子依赖）的实际文件，都从全局存储区通过<strong>硬链接 (hard links)</strong> 链接到 <code>node_modules/.pnpm/</code> 目录下的一个平铺结构中。</li>
+<li><strong>优势</strong>:<ul>
+<li><strong>极致的磁盘空间效率</strong>: 多个项目或工作区复用同一依赖时，不会产生任何文件副本，仅增加链接，磁盘占用几乎为零。</li>
+<li><strong>极高的安装速度</strong>: 如果所需包已存在于全局存储区，安装过程仅涉及创建链接，速度极快。</li>
+<li><strong>严格的依赖隔离</strong>: 其 <code>node_modules</code> 结构天然地杜绝了幽灵依赖，代码只能访问到 <code>package.json</code> 中声明的模块。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>横向对比分析</h2>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>npm</th>
+<th>Yarn</th>
+<th>pnpm</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>安装速度</strong></td>
+<td>中等，持续优化中</td>
+<td><strong>Classic</strong>: 较快<strong>Berry (PnP)</strong>: 极快</td>
+<td><strong>极快</strong></td>
+</tr>
+<tr>
+<td><strong>磁盘空间效率</strong></td>
+<td>低，每个项目独立复制</td>
+<td><strong>Classic</strong>: 低<strong>Berry (PnP)</strong>: 极高</td>
+<td><strong>极高</strong> (全局内容寻址存储)</td>
+</tr>
+<tr>
+<td><strong><code>node_modules</code> 结构</strong></td>
+<td>扁平化</td>
+<td><strong>Classic</strong>: 扁平化<strong>Berry (PnP)</strong>: 无 <code>node_modules</code></td>
+<td>非扁平化（符号链接）</td>
+</tr>
+<tr>
+<td><strong>Monorepo 支持</strong></td>
+<td>原生支持 (Workspaces)</td>
+<td>成熟且强大 (Workspaces)</td>
+<td><strong>非常出色</strong>，专为 Monorepo 优化</td>
+</tr>
+<tr>
+<td><strong>确定性</strong></td>
+<td>是 (<code>package-lock.json</code>)</td>
+<td>是 (<code>yarn.lock</code>)</td>
+<td>是 (<code>pnpm-lock.yaml</code>)</td>
+</tr>
+<tr>
+<td><strong>幽灵依赖问题</strong></td>
+<td>存在</td>
+<td><strong>Classic</strong>: 存在<strong>Berry (PnP)</strong>: 已解决</td>
+<td><strong>已解决</strong></td>
+</tr>
+</tbody></table>
+<h2>技术选型标准</h2>
+<ul>
+<li><strong>建议使用 npm 的场景</strong>:<ul>
+<li>对于小型、简单的项目，或当开发团队希望最小化工具链复杂性时，使用 Node.js 内置的 npm 是一个合理的默认选项。</li>
+<li>当项目对构建速度和磁盘占用不敏感时。</li>
+</ul>
+</li>
+<li><strong>建议使用 Yarn 的场景</strong>:<ul>
+<li><strong>Yarn Classic (v1)</strong>: 对于需要稳定、成熟的 Monorepo 解决方案且已有 Yarn 工作流的团队，Yarn Classic 依然是可靠的选择。</li>
+<li><strong>Yarn Berry (v2+)</strong>: 当项目追求极致的安装速度，并且团队愿意投入精力解决其 PnP 策略可能带来的生态兼容性问题时。</li>
+</ul>
+</li>
+<li><strong>建议使用 pnpm 的场景</strong>:<ul>
+<li>当<strong>磁盘空间</strong>和<strong>安装速度</strong>是首要考虑因素时，尤其是在 CI/CD 环境或拥有大量项目的组织中，pnpm 的优势最为突出。</li>
+<li>在开发大型项目或 Monorepo 时，pnpm 提供的严格依赖管理和高效的磁盘利用率能显著提升开发体验和资源效率。</li>
+</ul>
+</li>
+</ul>
+<h2>结论</h2>
+<p>npm、pnpm 和 Yarn 均为功能强大的包管理工具，它们通过不同的架构设计满足了 JavaScript 生态的多样化需求。npm 提供了基础而稳健的标准；Yarn 在其发展过程中推动了性能和 Monorepo 支持的进步；而 pnpm 则通过其创新的存储和链接机制，在性能和资源效率方面树立了新的标杆。</p>
+<p>技术选型并无绝对的优劣，而应基于项目的规模、性能要求、磁盘资源限制以及团队的技术栈熟悉度等因素进行综合评估。</p>
+<h2>拓展阅读</h2>
+<ol>
+<li><strong>官方文档</strong><ul>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fdocs.npmjs.com%2F">npm Docs</a>: npm CLI 的官方文档，包含关于 <code>package.json</code>、<code>package-lock.json</code> 和 <code>workspaces</code> 的信息。</li>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fyarnpkg.com%2Fgetting-started">Yarn Docs</a>: Yarn 的官方文档，同时覆盖了 Classic (v1) 和现代版本 (Berry)。</li>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fpnpm.io%2Fzh%2Fmotivation">pnpm Docs</a>: pnpm 的官方文档（中文版），详细解释了其设计动机和架构。</li>
+</ul>
+</li>
+<li><strong>核心概念与架构</strong><ul>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fdocs.npmjs.com%2Fcli%2Fv10%2Fconfiguring-npm%2Fpackage-lock-json">The <code>package-lock.json</code> file</a>: npm 官方对 <code>package-lock.json</code> 文件目的和结构的解释。</li>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fyarnpkg.com%2Ffeatures%2Fpnp">Yarn Plug&#39;n&#39;Play (PnP) Introduction</a>: 一篇深入解释 Yarn PnP 策略背后原理和机制的文章。</li>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fpnpm.io%2Fzh%2Fsymlinked-node-modules-structure">pnpm&#39;s symlinked <code>node_modules</code> structure</a>: pnpm 官方对其如何使用符号链接创建非扁平化 <code>node_modules</code> 目录的详细说明。</li>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Frushstack.io%2Fpages%2Fpnpm%2Fwhy_should_i_use_pnpm%2F">Why should we use pnpm?</a>: 来自 Monorepo 工具链 RushStack 维护者的文章，解释了他们为什么推荐使用 pnpm。</li>
+</ul>
+</li>
+<li><strong>社区讨论与对比</strong><ul>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fantfu.me%2Fposts%2Fpnpm-vs-npm-vs-yarn">npm vs Yarn vs pnpm</a>: 来自知名开源贡献者 Anthony Fu 的一篇对比文章。</li>
+<li><a href="https://www.google.com/url?q=https%3A%2F%2Fwww.kochan.io%2Fnodejs%2Fpnpms-strictness-helps-to-avoid-silly-bugs.html">Overview of the pnpm project</a>: pnpm 作者分享的一篇博客，讲述 pnpm 的严格性如何帮助避免一些常见的错误。</li>
+</ul>
+</li>
+</ol>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[更新日志]]></title>
+      <link>https://www.7rees.cc/articles/changlog</link>
+      <guid isPermaLink="false">changlog</guid>
+      <pubDate>Fri, 26 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[tech]]></category>
+      <description><![CDATA[更新日志]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <h3><strong>更新日志</strong></h3>
+<hr>
+<p><strong>[1.2.0] - 2025-12-27</strong></p>
+<ul>
+<li>新增RSS Feed链接。</li>
+<li>增加了页脚统计运行时间和字数。</li>
+<li>修复了一些已知问题。</li>
+</ul>
+<hr>
+<p><strong>[1.1.0] - 2025-12-26</strong></p>
+<ul>
+<li>新增新年彩蛋按钮。</li>
+</ul>
+<hr>
+<p><strong>[1.0.0] - 2025-12-25</strong></p>
+<p>🎄圣诞节快乐</p>
+<ul>
+<li>7rees.cc正式上线。</li>
+<li>修复了评论区因跨域问题无法加载的问题。</li>
+</ul>
+<hr>
+<p><strong>[0.4.0-Beta] - 2025-12-23</strong></p>
+<p>正式上线前最后一个大版本。</p>
+<ul>
+<li>重构导航栏，删除Projects，新增About。</li>
+<li>新增图片灯箱，点击可放大查看正文中的图片。</li>
+<li>修复最近在读什么中的图书封面显示。</li>
+<li>优化移动端显示。</li>
+</ul>
+<hr>
+<p><strong>[0.3.2-Beta] - 2025-12-23</strong></p>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了正文无法渲染HTML代码的问题。</li>
+<li>修复了其他已知问题。</li>
+</ul>
+<hr>
+<p><strong>[0.3.1-Beta] - 2025-12-21</strong></p>
+<p><strong>优化</strong></p>
+<ul>
+<li>优化了交换链接的显示体验。</li>
+<li>优化了Shields.io在正文中渲染效果不佳的问题。</li>
+</ul>
+<hr>
+<p><strong>[0.3.0-Beta] - 2025-12-20</strong></p>
+<p><strong>新增</strong></p>
+<ul>
+<li>新增了留言板功能，使用的是Artalk的自托管方案。</li>
+</ul>
+<hr>
+<p><strong>[0.2.1-Beta] - 2025-12-19</strong></p>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了当文章正文和页面整体因为代码块过长而产生水平晃动或白边的问题。</li>
+<li>今天才得知没有居住证或暂住证的情况下无法异地ICP备案，<del>OK此贴终结</del>果断放弃刚买的阿里云ECS转投AWS EC2.</li>
+</ul>
+<hr>
+<p><strong>[0.2.0-Beta] - 2025-12-18</strong></p>
+<p><strong>新增</strong></p>
+<ul>
+<li>新增了置顶功能。</li>
+<li>新增返回顶部的功能。</li>
+</ul>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了Home页邮箱图标点击事件无法正确跳转的问题。</li>
+<li>修复切换语言后，页面刷新自动还原为中文的问题。</li>
+<li>使用了更精致的Favicon。</li>
+</ul>
+<hr>
+<p><strong>[0.1.0-Beta] - 2025-12-17</strong></p>
+<p><strong>新增</strong></p>
+<ul>
+<li>完成整体页面设计。</li>
+</ul>
+<p><strong>修复</strong></p>
+<ul>
+<li>修复了社交图标显示问题。</li>
+<li>修复技术类文章详情页点击「返回文章」后，错误跳转至兴趣文章列表的问题。</li>
+<li>采用临时IP指向方案，保障测试阶段访问。</li>
+</ul>
+
+        </div>
+      ]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[2025：在虚构里捞点现实的碎屑]]></title>
+      <link>https://www.7rees.cc/articles/interest-5</link>
+      <guid isPermaLink="false">interest-5</guid>
+      <pubDate>Fri, 26 Dec 2025 16:00:00 GMT</pubDate>
+      <category><![CDATA[interest]]></category>
+      <description><![CDATA[2025：在虚构里捞点现实的碎屑]]></description>
+      <content:encoded><![CDATA[
+        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
+          <p>原本计划在2025年尾跟风写点年终总结之类的东西。</p>
+<p>打开Notion，写写删删、删删改改，最终还是没能写出让自己满意的文字。本来是个记忆力差劲、三分钟热度的人，让我一下子总结一年发生的事情，实在是笔力不足。</p>
+<p>那最终的决定是借用各平台的年度数据，来总结一下2025年的赛博起居注。<strong>所以这是一篇完全没有任何语言斟酌、没有任何营养、没有任何意义、纯粹自娱自乐的流水账口水文！</strong></p>
+<p>2025年最大的改变是从杭州搬到了南京，是我大学时期的dream land。虽然真生活在这里有点幻灭而且其实有点想杭州这事另说，至少现在的工作更加轻松，人也变得更松弛了。不过年龄增长的同时好像越来越惜命了，吃了很多补品，什么Swisse的维C和复合维生素、goodhealth的牡蛎精华，难说有没有用，聊以安慰吧。</p>
+<h3><strong>足迹</strong>：</h3>
+<p>今年海外去了日本的东京和韩国的济州两个城市，都是独行。虽然我既不会日语（看动漫学的三脚猫日语不算）也不会韩语，甚至英语也是勉强够用的程度，但还是玩的蛮开心，果然旅行才是人生的终极意义吧！</p>
+<h3><strong>游戏：</strong></h3>
+<p>今年玩的最开心的游戏应该是《三角洲行动》和《战地6》。</p>
+<p>不过三角洲行动很早就AFK了，已经感受不到刚开始的乐趣——不知道是不是因为自己本身电子ED的原因——身边的朋友也相继退坑，甚至约不到人玩。</p>
+<p><img src="https://s2.loli.net/2025/12/27/ck53zYlsLjtfMCr.webp" alt="img"></p>
+<blockquote>
+<p>Lumi：不许打三角洲了，陪我玩！</p>
+</blockquote>
+<p>倒是《战地6》让我越玩越开心，身为战地老粉，虽然每一代都是在被当薯条狂捞的路上，但是这一代还是给了我很大的惊喜。DICE好像真的会听玩家说话了，削减了大地图的数量，新增的试炼场模式相当惊艳，DICE念念不忘的大逃杀好像也真的不错，不过不建议绑定每周任务哈，实在不想做大逃杀任务（其实是根本打不死人），还有把你那反人类的UI和逆天bug改改你就是我心目中年度最佳。</p>
+<p><img src="https://s2.loli.net/2025/12/27/4jtYKPNmZgaec86.webp" alt="img"></p>
+<p>今年还线下看了守望先锋杭州Major总决赛，见证了CR夺冠。CNOW差强人意的成绩和半死不活的环境姑且就不再提了，聊聊单机。</p>
+<p><img src="https://s2.loli.net/2025/12/27/a2E1JI8SmZ5YTcN.webp" alt="img"></p>
+<p>今年第一次通关了美末1，受到相当大的震撼，边玩边求证这居然是2013年的游戏！我知道这个IP一直很出名，但我一直一直没玩过也没云过，顽皮狗你宣发还不够啊！</p>
+<p>《天国：拯救2》也是今年玩过最有趣的游戏，剧情演出、游戏玩法都很出色，唯一的不足可能是我的不足，这用鼠标滑动来控制攻击方向的战斗方式让我十分费解和十分不适，最终使我弃坑。</p>
+<p>《江山北望》这部影游也给了很大惊喜。其实我还蛮喜欢影游，第一部玩的应该是影游市场还没有像现在这么热火朝天时期的《隐形守护者》，这部《江山北望》也是前者的新作。剧情可圈可点，但是肉眼可见的贫穷，跟隔壁算是师出同门的《盛世天下》（这部是云的）的精致相比，可以说是被吊打的程度。期待下一部《绍宋》能够制作精良一点吧。</p>
+<h3><strong>影视：</strong></h3>
+<p>今年电影看了《名侦探柯南：迷宫的十字路口》、《八佰》、《穿越时空的少女》、《哪吒之魔童闹海》、《唐探1900》、《绿皮书》、《黑客帝国》、《花样年华》、《机动战士高达：跨时之战》、《猎金游戏》、《一代宗师》、《碟中谍8：最终清算》、《奥本海默》、《F1：狂飙飞车》、《1917》、《鬼灭之刃：无限城篇 第一章 猗窝座再袭》、《疯狂动物城2》。其中个人认为观影体验最好的是《F1：狂飙飞车》、《花样年华》和《疯狂动物城2》，最烂的是哪吒，哪吒我还被迫看了两遍，……。值得一提的是，《奥本海默》是我在飞往东京的航班上看的，坐在前排的一个日本哥们也在看，哈哈。</p>
+<p><img src="https://s2.loli.net/2025/12/27/tL62o7gSNYVruAK.webp" alt="img"></p>
+<p>电视剧看了《未知的首尔》、《重启人生》和《东京爱情故事》，《重启人生》真真好评。</p>
+<p>后面应该会单独写几篇影评，大概吧……</p>
+<h3><strong>阅读：</strong></h3>
+<p>读书越来越趋向于电子阅读了，虽然今年买了好几本新书，结果确实实体书在书架落灰，真正看的还是微信读书里的电子版本，曾几何时我还很不提倡电子阅读来着……</p>
+<p>今年读完了《长安的荔枝》、《太白金星有点烦》、《局外人》、《龙与少年游》、《撒哈拉的故事》、《解忧杂货店》、《地狱变》，今年才开始读的有《长日将尽》、《留德十年》、《红楼梦》。红楼梦算是重读，上一次看还是初三，还真是常看常新。今年的诺奖得主克拉斯诺霍尔卡伊·拉斯洛的代表作《撒旦探戈》，翻了几页感觉好难读，不知道是不是翻译的问题。感想是诺奖不愧是诺奖，还有感想是去年韩江那种浅滩文学到底是怎么夺奖的……</p>
+<p>哦对了，2025年《百年孤独》的阅读进度是3%（扶额笑）。</p>
+<p><img src="https://s2.loli.net/2025/12/27/9DOyYFRjrHGnXmB.jpg" alt="img"></p>
+<p>在写这篇总结的时候，我边查着豆瓣的影音记录，边震惊于这电影竟然是今年看的，竟然是今年才上映的，啊不是去年吗。</p>
+<p>2025年就是这么感觉过得又快又慢的一年，庸庸碌碌浪费了人生的又一个365天。希望这次博客运行的能够长久一点，兴许明年还能再乱写个年终总结？算了还是不要再立flag了，总结大概率是不会有了，还是祈祷小破站能够活得久一点吧。</p>
+<p>眼看今天27号将要结束，距离2026年不过4天而已。提前祝大家2026新年快乐，还请收下这干涩贫瘠的祝福。</p>
+<p>所以，2025，要不先别走？</p>
+
+        </div>
+      ]]></content:encoded>
+    </item>
     <item>
       <title><![CDATA[基于大语言模型（LLM）的遗留系统重构与自动化测试流水线实践]]></title>
       <link>https://www.7rees.cc/articles/tech-2</link>
@@ -351,99 +696,6 @@ LLM 偶尔会引入不存在的库或语法。</li>
 <p>好在是虚惊一场。</p>
 <p>刚落地还发了个朋友圈“开始了，小x的奇妙冒险”，这下真是冒上险了。</p>
 <p><img src="https://s2.loli.net/2025/12/23/AvXGTtDBEsQ6ywb.webp" alt="朋友圈"></p>
-
-        </div>
-      ]]></content:encoded>
-    </item>
-    <item>
-      <title><![CDATA[更新日志]]></title>
-      <link>https://www.7rees.cc/articles/changlog</link>
-      <guid isPermaLink="false">changlog</guid>
-      <pubDate>Tue, 23 Dec 2025 16:00:00 GMT</pubDate>
-      <category><![CDATA[tech]]></category>
-      <description><![CDATA[更新日志]]></description>
-      <content:encoded><![CDATA[
-        <div class="markdown-body" style="font-family: sans-serif; line-height: 1.6;">
-          <h3><strong>更新日志</strong></h3>
-<hr>
-<p><strong>[1.2.0] - 2025-12-26</strong></p>
-<ul>
-<li>新增RSS Feed链接。</li>
-<li>修复了一些已知问题。</li>
-</ul>
-<hr>
-<p><strong>[1.1.0] - 2025-12-26</strong></p>
-<ul>
-<li>新增新年彩蛋按钮。</li>
-</ul>
-<hr>
-<p><strong>[1.0.0] - 2025-12-25</strong></p>
-<p>🎄圣诞节快乐</p>
-<ul>
-<li>7rees.cc正式上线。</li>
-<li>修复了评论区因跨域问题无法加载的问题。</li>
-</ul>
-<hr>
-<p><strong>[0.4.0-Beta] - 2025-12-23</strong></p>
-<p>正式上线前最后一个大版本。</p>
-<ul>
-<li>重构导航栏，删除Projects，新增About。</li>
-<li>新增图片灯箱，点击可放大查看正文中的图片。</li>
-<li>修复最近在读什么中的图书封面显示。</li>
-<li>优化移动端显示。</li>
-</ul>
-<hr>
-<p><strong>[0.3.2-Beta] - 2025-12-23</strong></p>
-<p><strong>修复</strong></p>
-<ul>
-<li>修复了正文无法渲染HTML代码的问题。</li>
-<li>修复了其他已知问题。</li>
-</ul>
-<hr>
-<p><strong>[0.3.1-Beta] - 2025-12-21</strong></p>
-<p><strong>优化</strong></p>
-<ul>
-<li>优化了交换链接的显示体验。</li>
-<li>优化了Shields.io在正文中渲染效果不佳的问题。</li>
-</ul>
-<hr>
-<p><strong>[0.3.0-Beta] - 2025-12-20</strong></p>
-<p><strong>新增</strong></p>
-<ul>
-<li>新增了留言板功能，使用的是Artalk的自托管方案。</li>
-</ul>
-<hr>
-<p><strong>[0.2.1-Beta] - 2025-12-19</strong></p>
-<p><strong>修复</strong></p>
-<ul>
-<li>修复了当文章正文和页面整体因为代码块过长而产生水平晃动或白边的问题。</li>
-<li>今天才得知没有居住证或暂住证的情况下无法异地ICP备案，<del>OK此贴终结</del>果断放弃刚买的阿里云ECS转投AWS EC2.</li>
-</ul>
-<hr>
-<p><strong>[0.2.0-Beta] - 2025-12-18</strong></p>
-<p><strong>新增</strong></p>
-<ul>
-<li>新增了置顶功能。</li>
-<li>新增返回顶部的功能。</li>
-</ul>
-<p><strong>修复</strong></p>
-<ul>
-<li>修复了Home页邮箱图标点击事件无法正确跳转的问题。</li>
-<li>修复切换语言后，页面刷新自动还原为中文的问题。</li>
-<li>使用了更精致的Favicon。</li>
-</ul>
-<hr>
-<p><strong>[0.1.0-Beta] - 2025-12-17</strong></p>
-<p><strong>新增</strong></p>
-<ul>
-<li>完成整体页面设计。</li>
-</ul>
-<p><strong>修复</strong></p>
-<ul>
-<li>修复了社交图标显示问题。</li>
-<li>修复技术类文章详情页点击「返回文章」后，错误跳转至兴趣文章列表的问题。</li>
-<li>采用临时IP指向方案，保障测试阶段访问。</li>
-</ul>
 
         </div>
       ]]></content:encoded>

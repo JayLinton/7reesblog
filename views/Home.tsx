@@ -14,7 +14,6 @@ const socialLinks: SocialLink[] = [
   { name: 'Email', url: 'mailto:1063750098@qq.com', icon: <MailIcon className="w-full h-full" /> },
 ];
 
-// Use 100dvh for better mobile browser support (addresses address bar resizing)
 const Section: React.FC<{ id: string; children: React.ReactNode; className?: string }> = ({ id, children, className }) => (
   <section id={id} className={`h-[100dvh] w-full snap-start shrink-0 overflow-hidden relative flex flex-col items-center justify-center ${className}`}>
     {children}
@@ -50,7 +49,7 @@ const HomeView: React.FC<{ lang: Language }> = ({ lang }) => {
           >
             <div className="relative w-full max-w-xl">
               <DotMatrixImage 
-                src="https://s2.loli.net/2025/12/19/qnpzAvuljBrCfME.webp" 
+                src="https://s2.loli.net/2025/12/27/4ghfLaSq3H7UPie.webp" 
                 className="w-full"
               />
               <span className="absolute -bottom-8 left-0 text-[10px] tracking-[0.2em] text-gray-500 dark:text-gray-400 font-light uppercase">
@@ -95,10 +94,8 @@ const HomeView: React.FC<{ lang: Language }> = ({ lang }) => {
                 className="inline-block cursor-pointer group/name"
                 onClick={() => navigate('/articles/aboutme')}
               >
-              {/* Responsive text size: 3xl on mobile, 4xl on desktop */}
               <h2 className="font-sans font-bold text-3xl md:text-4xl mb-2 tracking-wide text-neutral-900 dark:text-neutral-100 transition-colors relative">
                 7rees
-                {/* 下划线动画 */}
                 <span className="absolute left-0 bottom-0 w-full h-[2px] bg-neutral-800 dark:bg-neutral-200 origin-left scale-x-0 group-hover/name:scale-x-100 transition-transform duration-300 ease-out" />
               </h2>
               </div>
@@ -109,7 +106,7 @@ const HomeView: React.FC<{ lang: Language }> = ({ lang }) => {
             <p className="font-light text-gray-600 dark:text-gray-300 leading-relaxed mb-12 max-w-md mx-auto">
               {lang === 'zh' 
                 ? '除了死亡这一唯一的宿命，世间一切，无论是欢愉还是幸福，皆是自由。' 
-                : 'Hors de cette seule fatalité que est la mort, tout, bonheur ou joie, est liberté.'}
+                : 'Hors de cette seule fatalité que est la mort, tout, bonheur or joie, est liberté.'}
             </p>
           </motion.div>
 
@@ -124,7 +121,7 @@ const HomeView: React.FC<{ lang: Language }> = ({ lang }) => {
             ))}
           </motion.div>
         </div>
-        <Footer className="absolute bottom-2" />
+        <Footer className="absolute bottom-2" lang={lang} />
       </Section>
     </motion.div>
   );

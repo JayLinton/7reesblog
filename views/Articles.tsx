@@ -73,7 +73,7 @@ const ArticlesView: React.FC<{ lang: Language }> = ({ lang }) => {
       </div>
       
       <div className="flex-grow"></div>
-      <Footer className="mt-16" />
+      <Footer className="mt-16" lang={lang} />
     </motion.div>
   );
 };
